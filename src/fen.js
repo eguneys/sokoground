@@ -2,6 +2,8 @@ import { pos2key } from './util';
 
 const roles = { '#': 'wall', '.': 'target', ' ': 'space', '$': 'box', '*': 'boxtarget', '@': 'char' };
 
+const invRoles = { 'wall': '#', 'target': '.', 'space': ' ', 'box': '$', 'boxtarget': '*', 'char': '@' };
+
 export function read(fen) {
   var squares = {};
   var pieces = {};
@@ -68,6 +70,34 @@ export function read(fen) {
 
   return { squares, pieces };
 };
+
+export function write(squares, pieces) {
+  var res = '';
+  for (var x = 0; x < 20; x++) {
+    var line = '';
+    for (var y = 0; y < 20; y++) {
+      const square = squares[pos2key([x, y])];
+      const piece = pieces[pos2key([x, y])];
+      var char;
+      if (piece) {
+        if (piece.role === 'box') {
+          if (square.role === 'space') {
+            char = invRoles['box'];
+          } else {
+            char = invRoles['boxtarget'];
+          }
+        } else {
+          char = invRoles['char'];
+        }
+      } else {
+        char = invRoles[square.role];
+      }
+      line += char;
+    }
+    res += line + '\n';
+  }
+  return res;
+}
 
 
 export function loadLevels(cb) {

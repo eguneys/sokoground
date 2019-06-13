@@ -22,7 +22,8 @@
   <div id="app" class="is2d"></div>
 
   <div class="hud">
-    <span id="level">?</div>
+    <p> Fen <span id="fen">?</span></p>
+    <p> Level <span id="level">?</span></p>
   </div>
 
   <div class="controls">
@@ -33,9 +34,21 @@
 
 <script>
 
+ var sokoban;
  var level = 1;
- Sokoban(document.getElementById('app'), { level: level }, sokoban => {
+
+ var opts = {
+   events: {
+     move() {
+       renderFen(sokoban.getFen());
+     }
+   }
+ };
+
+ Sokoban(document.getElementById('app'), opts, soko => {
+   sokoban = soko;
    renderLevel(level);
+   renderFen(sokoban.getFen());
    onClick(document.getElementById('nextLevel'), () => {
      level++;
      renderLevel(level);
@@ -53,10 +66,13 @@
    });
  });
 
+ function renderFen(fen) {
+   document.getElementById('fen').innerHTML = fen;
+ }
 
  function renderLevel(level) {
    document.getElementById('level').innerHTML = level;
- }
+ } 
 
  function onClick(el, f) {
    el.addEventListener('click', f);

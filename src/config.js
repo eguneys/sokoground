@@ -4,8 +4,8 @@ export function configure(state, config) {
 
   merge(state, config);
 
-  if (config.level) {
-    config.fen = state.levels[config.level - 1];
+  if (state.level) {
+    config.fen = state.levels[state.level - 1];
   }
   if (config.fen) {
     const { squares, pieces } = fenRead(config.fen);

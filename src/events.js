@@ -32,5 +32,6 @@ function startMove(s) {
       move.right(s);
       break;
     }
+    e.preventDefault();
   };
 }

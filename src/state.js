@@ -1,5 +1,7 @@
 export function defaults() {
   return {
-    dirs: {}
+    level: 1,
+    dirs: {},
+    events: {}
   };
 }

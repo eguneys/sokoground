@@ -1,3 +1,6 @@
+function callUserFunction(f) {
+  if (f) setTimeout(f, 0);
+}
 
 function baseMove(s, orig, dest, dest2) {
   if (s.pieces[dest]) {
@@ -5,6 +8,8 @@ function baseMove(s, orig, dest, dest2) {
   }
   s.pieces[dest] = s.pieces[orig];
   delete s.pieces[orig];
+
+  callUserFunction(s.events.move);
 }
 
 function canMove(s, orig, dest, dest2) {

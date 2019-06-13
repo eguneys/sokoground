@@ -1,10 +1,10 @@
 import { pos2key, key2pos } from './util';
 import * as board from './board';
 
-const dirRight = [1, 0];
-const dirLeft = [-1, 0];
-const dirUp = [0, -1];
-const dirDown = [0, 1];
+export const dirRight = [1, 0];
+export const dirLeft = [-1, 0];
+export const dirUp = [0, -1];
+export const dirDown = [0, 1];
 
 function move(s, dir) {
   const origKey = findChar(s),
@@ -22,7 +22,7 @@ function move(s, dir) {
   s.dom.redraw();
 }
 
-function findChar(s) {
+export function findChar(s) {
   for (var key of Object.keys(s.pieces)) {
     var piece = s.pieces[key];
     if (piece.role === 'char') {
