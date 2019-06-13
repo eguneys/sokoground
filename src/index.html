@@ -20,7 +20,9 @@
 
 <script>
 
- var sokoban = Sokoban(document.getElementById('app'), {});
+ Sokoban(document.getElementById('app'), { level: 1 }, sokoban => {
+   console.log(sokoban);
+ });
  
 </script>
 

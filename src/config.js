@@ -1,6 +1,15 @@
+import { read as fenRead } from './fen';
+
 export function configure(state, config) {
 
   merge(state, config);
+
+  if (config.level) {
+    config.fen = state.levels[config.level];
+  }
+  if (config.fen) {
+    state.pieces = fenRead(config.fen);
+  }
 
 }
 

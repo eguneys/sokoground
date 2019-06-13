@@ -7,10 +7,11 @@ import * as events from './events';
 import renderWrap from './wrap';
 import render from './render';
 
-export function app(element, config) {
+import { loadLevels } from './fen';
+
+export function app(element, config, onLoad) {
 
   const state = defaults();
-  configure(state, config || {});
 
   function redrawAll() {
 
@@ -28,9 +29,16 @@ export function app(element, config) {
 
     state.dom.unbind = events.bindDocument(state, redrawAll);
   }
-  redrawAll();
 
-  const api = start(state, redrawAll);
+  loadLevels(levels => {
+    state.levels = levels;
 
-  return api;  
+    configure(state, config || {});
+
+    redrawAll();
+
+    const api = start(state, redrawAll);
+
+    onLoad(api);
+  });
 };
