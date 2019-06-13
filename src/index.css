@@ -10,9 +10,13 @@ sg-board {
   height: 100%;
 }
 
-piece {
+piece, square {
   position: absolute;
   height: 5%;
   width: 5%;
   background-size: cover;
+}
+
+piece {
+  z-index: 1;
 }

@@ -7,38 +7,57 @@ export default function render(s) {
         translate = util.translate,
         boardEl = s.dom.elements.board,
         pieces = s.pieces,
+        squares = s.squares,
         samePieces = {},
+        sameSquares = {},
         movedPieces = {},
-        piecesKeys = Object.keys(pieces);
+        movedSquares = {},
+        piecesKeys = Object.keys(pieces),
+        squaresKeys = Object.keys(squares);
   let k,
       p,
       el,
       pieceAtKey,
+      squareAtKey,
       elPieceName,
+      elSquareName,
       pMvdSet,
-      pMvd;
+      pMvd,
+      sMvdSet,
+      sMvd;
 
   el = boardEl.firstChild;
 
   while (el) {
     k = el.sgKey;
-    pieceAtKey = pieces[k];
-    elPieceName = el.sgPiece;
 
-    if (pieceAtKey) {
-      if (elPieceName === pieceNameOf(pieceAtKey)) {
-        samePieces[k] = true;
+    if (isPieceNode(el)) {
+      pieceAtKey = pieces[k];
+      elPieceName = el.sgPiece;
+
+      if (pieceAtKey) {
+        if (elPieceName === pieceNameOf(pieceAtKey)) {
+          samePieces[k] = true;
+        } else {
+          safePush(movedPieces, elPieceName, el);
+        }
       } else {
-        if (movedPieces[elPieceName]) 
-          movedPieces[elPieceName].push(el);
-        else 
-          movedPieces[elPieceName] = [el];        
+        safePush(movedPieces, elPieceName, el);
+
       }
-    } else {
-      if (movedPieces[elPieceName]) 
-        movedPieces[elPieceName].push(el);
-      else 
-        movedPieces[elPieceName] = [el];
+    } else if (isSquareNode(el)) {
+      squareAtKey = squares[k];
+      elSquareName = el.sgSquare;
+
+      if (squareAtKey) {
+        if (elSquareName === pieceNameOf(squareAtKey)) {
+          sameSquares[k] = true;
+        } else {
+          safePush(movedSquares, elSquareName, el); 
+        }
+      } else {
+        safePush(movedSquares, elSquareName, el);
+      }      
     }
 
     el = el.nextSibling;
@@ -73,9 +92,46 @@ export default function render(s) {
     }
   }
 
+  for (const j in squaresKeys) {
+    k = squaresKeys[j];
+    p = squares[k];
+
+    if (!sameSquares[k]) {
+      sMvdSet = movedSquares[pieceNameOf(p)];
+      sMvd = sMvdSet && sMvdSet.pop();
+
+      // same square moved
+      if (sMvd) {
+        sMvd.sgKey = k;
+        const pos = key2pos(k);
+        translate(sMvd, posToTranslate(pos));
+
+      // no square in moved obj: insert new square
+      } else {
+        const squareName = pieceNameOf(p);
+        const squareNode = createEl('square', squareName);
+        
+        const pos = key2pos(k);
+        squareNode.sgSquare = squareName;
+        squareNode.sgKey = k;
+        translate(squareNode, posToTranslate(pos));
+        boardEl.appendChild(squareNode);
+      }
+    }
+  }
+
   // remove any element that remains in the moved sets
   for (const i in movedPieces) removeNodes(s, movedPieces[i]);
+  for (const i in movedSquares) removeNodes(s, movedSquares[i]);
 
+}
+
+function isPieceNode(el) {
+  return el.tagName === 'PIECE';
+}
+
+function isSquareNode(el) {
+  return el.tagName === 'SQUARE';
 }
 
 function removeNodes(s, nodes) {
@@ -85,4 +141,11 @@ function removeNodes(s, nodes) {
 
 function pieceNameOf(piece) {
   return piece.role;
+}
+
+function safePush(arr, key, el) {
+  if (arr[key]) 
+    arr[key].push(el);
+  else 
+    arr[key] = [el];
 }

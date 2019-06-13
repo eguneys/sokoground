@@ -8,7 +8,9 @@ export function configure(state, config) {
     config.fen = state.levels[config.level - 1];
   }
   if (config.fen) {
-    state.pieces = fenRead(config.fen);
+    const { squares, pieces } = fenRead(config.fen);
+    state.squares = squares;
+    state.pieces = pieces;
   }
 
 }

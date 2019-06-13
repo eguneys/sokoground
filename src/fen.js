@@ -1,8 +1,9 @@
 import { pos2key } from './util';
 
-const roles = { '#': 'wall', '.': 'target', ' ': 'space', '$': 'box', '@': 'char' };
+const roles = { '#': 'wall', '.': 'target', ' ': 'space', '$': 'box', '*': 'boxtarget', '@': 'char' };
 
 export function read(fen) {
+  var squares = {};
   var pieces = {};
   const lines = fen.split('\n');
   const maxColumns = lines.reduce((acc, line) => (acc < line.length) ?line.length:acc, 0);
@@ -32,13 +33,40 @@ export function read(fen) {
 
     for (var col = 0; col < line.length; col++) {
       var role = line[col];
-      pieces[pos2key([col, row])] = {
-        role: roles[role]
-      };
+      switch (roles[role]) {
+      case 'char':
+        squares[pos2key([col, row])] = {
+          role: 'space'
+        };
+        pieces[pos2key([col, row])] = {
+          role: 'char'
+        };
+        break;
+      case 'box':
+        squares[pos2key([col, row])] = {
+          role: 'space'
+        };
+        pieces[pos2key([col, row])] = {
+          role: 'box'
+        };
+        break;
+      case 'boxtarget':
+        squares[pos2key([col, row])] = {
+          role: 'target'
+        };
+        pieces[pos2key([col, row])] = {
+          role: 'box'
+        };
+        break;
+      default:
+        squares[pos2key([col, row])] = {
+          role: roles[role]
+        };
+      }
     }
   });
 
-  return pieces;
+  return { squares, pieces };
 };
 
 
