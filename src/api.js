@@ -1,6 +1,7 @@
 import { configure } from './config';
 import { write as fenWrite } from './fen';
 import * as move from './move';
+import * as board from './board';
 
 export function start(state, redraw) {
   return {
@@ -9,6 +10,12 @@ export function start(state, redraw) {
     },
     getFen() {
       return fenWrite(state.squares, state.pieces);
+    },
+    getLegalMoves() {
+      return board.legalMoves(state);
+    },
+    isEnd() {
+      return board.isEnd(state);
     },
     move(dir) {
       render(state => {

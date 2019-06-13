@@ -6,7 +6,7 @@ export const dirLeft = [-1, 0];
 export const dirUp = [0, -1];
 export const dirDown = [0, 1];
 
-function move(s, dir) {
+export function dests(s, dir) {
   const origKey = findChar(s),
         origPos = key2pos(origKey),
         destPos = [origPos[0] + dir[0],
@@ -16,8 +16,16 @@ function move(s, dir) {
         destKey = pos2key(destPos),
         dest2Key = pos2key(dest2Pos);
   
+  return { orig: origKey,
+           dest: destKey,
+           dest2: dest2Key };
+}
 
-  board.move(s, origKey, destKey, dest2Key);
+function move(s, dir) {
+
+  const { orig, dest, dest2 } = dests(s, dir);
+
+  board.apiMove(s, orig, dest, dest2);
 
   s.dom.redraw();
 }

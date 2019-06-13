@@ -27,7 +27,12 @@
   </div>
 
   <div class="hud">
-    <p> Level <span id="level">?</span></p>
+    <p> <span> Level </span> <span id="level">?</span>
+      <span> Status </span> <span id="isend"> ? </span> 
+      <span> Legal moves </span>
+      <span id="legals">?</span>
+    </p>
+
     <p> Fen <span id="fen">?</span></p>
   </div>
 
@@ -41,13 +46,30 @@
  var opts = {
    events: {
      move() {
-       renderFen(sokoban.getFen());
+       renderHud(level, sokoban);
      }
    }
  };
 
+ function initAi(fen) {
+   function onBestMove(move) {
+     console.log(move);
+   }
+   
+   var engine = new Sokoban.Engine(onBestMove, fen);
+
+   engine.setPosition(fen);
+
+   engine.go({
+     searchDeadline: Date.now() + 2000
+   });   
+ }
+
  Sokoban(document.getElementById('app'), opts, soko => {
    sokoban = soko;
+
+   initAi(sokoban.getFen());
+
    renderHud(level, sokoban);
    onClick(document.getElementById('nextLevel'), () => {
      level++;
@@ -68,7 +90,17 @@
 
  function renderHud(level, sokoban) {
    renderLevel(level);
+   renderLegals(sokoban.getLegalMoves());
    renderFen(sokoban.getFen());
+   renderIsEnd(sokoban.isEnd()?"is end": "is playing");
+ }
+
+ function renderIsEnd(str) {
+   document.getElementById('isend').innerHTML = str;
+ }
+
+ function renderLegals(legals) {
+   document.getElementById('legals').innerHTML = legals;
  }
 
  function renderFen(fen) {
