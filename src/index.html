@@ -11,18 +11,56 @@
          height: 0;
          padding-bottom: 90%;
      }
+     .controls {
+         margin: auto;
+     }
     </style>
+    <link rel="stylesheet" href="./assets/piece-css/pixel.css"/>
 </head>
 <body>
 <section>
-  <div id="app"></div>
+  <div id="app" class="is2d"></div>
+
+  <div class="hud">
+    <span id="level">?</div>
+  </div>
+
+  <div class="controls">
+    <button id="nextLevel"> Next Level </button>
+    <button id="prevLevel"> Previous Level </button>
+  </div>
 </section>
 
 <script>
 
- Sokoban(document.getElementById('app'), { level: 1 }, sokoban => {
-   console.log(sokoban);
+ var level = 1;
+ Sokoban(document.getElementById('app'), { level: level }, sokoban => {
+   renderLevel(level);
+   onClick(document.getElementById('nextLevel'), () => {
+     level++;
+     renderLevel(level);
+     sokoban.set({
+       level: level
+     });
+   });
+
+   onClick(document.getElementById('prevLevel'), () => {
+     level--;
+     renderLevel(level);
+     sokoban.set({
+       level: level
+     });
+   });
  });
+
+
+ function renderLevel(level) {
+   document.getElementById('level').innerHTML = level;
+ }
+
+ function onClick(el, f) {
+   el.addEventListener('click', f);
+ }
  
 </script>
 

@@ -1,16 +1,44 @@
+import { pos2key } from './util';
+
 const roles = { '#': 'wall', '.': 'target', ' ': 'space', '$': 'box', '@': 'char' };
 
 export function read(fen) {
+  var pieces = {};
   const lines = fen.split('\n');
   const maxColumns = lines.reduce((acc, line) => (acc < line.length) ?line.length:acc, 0);
-  return lines.map(line => {
+
+  var needRows = 20 - lines.length;
+
+  while (needRows-- > 0) {
+    lines.push("#");
+  }
+
+  lines.forEach((line, row) => {
     while (line.length < maxColumns) {
       line = line + " ";
     }
-    return Array.prototype.map.call(line, c => ({
-      role: roles[c]
-    }));
+
+    var gap = 20 - maxColumns;
+    if (gap > 0) {
+      var left = Math.floor(gap / 2);
+      var right = left + gap % 2;
+      while (left-- > 0) {
+        line = "#" + line;
+      }
+      while (right-- > 0) {
+        line = line + "#";
+      }
+    }
+
+    for (var col = 0; col < line.length; col++) {
+      var role = line[col];
+      pieces[pos2key([col, row])] = {
+        role: roles[role]
+      };
+    }
   });
+
+  return pieces;
 };
 
 

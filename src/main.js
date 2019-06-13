@@ -23,7 +23,7 @@ export function app(element, config, onLoad) {
 
     state.dom = {
       elements,
-      redreaw: redrawNow,
+      redraw: redrawNow,
       redrawNow: redrawNow
     };
 
