@@ -1,25 +1,25 @@
 import { pos2key, key2pos } from './util';
+import * as board from './board';
 
-const dirRight = [-1, 0];
-const dirLeft = [1, 0];
+const dirRight = [1, 0];
+const dirLeft = [-1, 0];
 const dirUp = [0, -1];
 const dirDown = [0, 1];
 
-function baseMove(s, orig, dest, dest2) {
-  
-}
-
-function canMove(s, key, dir) {
-  return true;
-}
-
 function move(s, dir) {
-  const charKey = findChar(s),
-        charPos = key2pos(charKey);
+  const origKey = findChar(s),
+        origPos = key2pos(origKey),
+        destPos = [origPos[0] + dir[0],
+                   origPos[1] + dir[1]],
+        dest2Pos = [destPos[0] + dir[0],
+                    destPos[1] + dir[1]],
+        destKey = pos2key(destPos),
+        dest2Key = pos2key(dest2Pos);
+  
 
-  if (canMove(s, charKey, dir)) {
-    baseMove(s, charKey, dir);
-  }
+  board.move(s, origKey, destKey, dest2Key);
+
+  s.dom.redraw();
 }
 
 function findChar(s) {
