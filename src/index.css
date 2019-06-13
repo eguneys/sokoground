@@ -1,0 +1,11 @@
+sg-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+sg-board {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
