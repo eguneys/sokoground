@@ -31,6 +31,8 @@ function startMove(s) {
     case "ArrowRight":
       move.right(s);
       break;
+    default:
+      return;
     }
     e.preventDefault();
   };

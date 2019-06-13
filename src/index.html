@@ -21,15 +21,16 @@
 <section>
   <div id="app" class="is2d"></div>
 
-  <div class="hud">
-    <p> Fen <span id="fen">?</span></p>
-    <p> Level <span id="level">?</span></p>
-  </div>
-
   <div class="controls">
     <button id="nextLevel"> Next Level </button>
     <button id="prevLevel"> Previous Level </button>
   </div>
+
+  <div class="hud">
+    <p> Level <span id="level">?</span></p>
+    <p> Fen <span id="fen">?</span></p>
+  </div>
+
 </section>
 
 <script>
@@ -47,11 +48,10 @@
 
  Sokoban(document.getElementById('app'), opts, soko => {
    sokoban = soko;
-   renderLevel(level);
-   renderFen(sokoban.getFen());
+   renderHud(level, sokoban);
    onClick(document.getElementById('nextLevel'), () => {
      level++;
-     renderLevel(level);
+     renderHud(level, sokoban);
      sokoban.set({
        level: level
      });
@@ -59,12 +59,17 @@
 
    onClick(document.getElementById('prevLevel'), () => {
      level--;
-     renderLevel(level);
+     renderHud(level, sokoban);
      sokoban.set({
        level: level
      });
    });
  });
+
+ function renderHud(level, sokoban) {
+   renderLevel(level);
+   renderFen(sokoban.getFen());
+ }
 
  function renderFen(fen) {
    document.getElementById('fen').innerHTML = fen;
