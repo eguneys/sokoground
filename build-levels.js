@@ -11,7 +11,8 @@ function read(filename, cb) {
     levels.splice(-1);
     levels = levels.map(level => {
       var newLineAt = level.indexOf('\n');
-      return level.slice(newLineAt).trim();
+      var str = level.slice(newLineAt);
+      return str.replace(/^\n|\n$/g, '');
     });
     cb(err, levels);
   });

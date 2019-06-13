@@ -27,6 +27,7 @@ export function app(element, config, onLoad) {
       redrawNow: redrawNow
     };
 
+    redrawNow();
     state.dom.unbind = events.bindDocument(state, redrawAll);
   }
 

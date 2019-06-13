@@ -5,7 +5,7 @@ export function configure(state, config) {
   merge(state, config);
 
   if (config.level) {
-    config.fen = state.levels[config.level];
+    config.fen = state.levels[config.level - 1];
   }
   if (config.fen) {
     state.pieces = fenRead(config.fen);
