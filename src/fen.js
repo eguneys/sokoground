@@ -76,8 +76,8 @@ export function write(squares, pieces) {
   for (var x = 0; x < 20; x++) {
     var line = '';
     for (var y = 0; y < 20; y++) {
-      const square = squares[pos2key([x, y])];
-      const piece = pieces[pos2key([x, y])];
+      const square = squares[pos2key([y, x])];
+      const piece = pieces[pos2key([y, x])];
       var char;
       if (piece) {
         if (piece.role === 'box') {

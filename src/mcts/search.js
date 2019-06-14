@@ -8,9 +8,14 @@ export default function Search(tree,
                                bestMoveCb,
                                limits) {
 
-  var shouldStop = false,
+  this.playedHistory = 
+    tree.getPositionHistory();
+
+  let shouldStop = false,
       bestMoveIsSent = false,
       finalBestMove;
+  
+  this.rootNode = tree.getCurrentHead();
 
   const getTimeToDeadline = () => {
     if (!limits.searchDeadline) return 0;
