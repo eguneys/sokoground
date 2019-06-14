@@ -32,7 +32,21 @@ export function NodeTree() {
 }
 
 export function Edge(move) {
+  var p;
+
   this.move = move;
+
+  this.setP = (p_) => {
+    p = p_;
+  };
+
+  this.getP = () => {
+    return p;
+  };
+
+  this.getMove = () => {
+    return this.move;
+  };
 }
 
 export function Node(parent, index) {
@@ -71,33 +85,34 @@ export function Node(parent, index) {
 export function EdgeAndNode(edge, node) {
   this.edge = edge;
   this.node = node;
+
+  this.getQ = (defaultQ) => {
+    return (this.node && this.node.getN() > 0) ? node.getQ() : defaultQ;
+  };
+
+  this.getN = () => {
+    return this.node ? this.node.getN() : 0;
+  };
+
+
+  this.getP = () => {
+    return this.edge.getP();
+  };
+
+  this.getMove = () => {
+    return this.edge ? this.edge.getMove() : '';
+  };
 }
 
 export function EdgeIterator(edges, node) {
 
-  var currentIdx = 0,
-      totalCount = edges.length;
-
-  this.edgeAndNode = new EdgeAndNode(edges[0],
-                                     null);
-
-  const actualize = () => {
-    
-  };
-
-  if (this.edgeAndNode.edge) {
-    actualize();
-  }
-
-
-
-  this.next = () => {
-    if (++currentIdx === totalCount) {
-      this.edgeAndNode.edge = null;
-    } else {
-      this.edgeAndNode.edge = edges[currentIdx+1];
-      actualize();
+  this.range = () => {
+    var res = [];
+  
+    for (var i = 0; i< edges.length; i++) {
+      res.push(new EdgeAndNode(edges[i], null));
     }
+    return res;
   };
 }
 

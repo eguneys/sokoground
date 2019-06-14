@@ -51,9 +51,10 @@
    }
  };
 
- function initAi(fen) {
+ function initAi(sokoban) {
+   var fen = sokoban.getFen();
    function onBestMove(move) {
-     console.log(move);
+     sokoban.move(move);
    }
    
    var engine = new Sokoban.Engine(onBestMove, fen);
@@ -68,7 +69,7 @@
  Sokoban(document.getElementById('app'), opts, soko => {
    sokoban = soko;
 
-   initAi(sokoban.getFen());
+   initAi(sokoban);
 
    renderHud(level, sokoban);
    onClick(document.getElementById('nextLevel'), () => {

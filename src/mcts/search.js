@@ -1,4 +1,5 @@
 import SearchWorker from './worker';
+import { EdgeAndNode } from './node';
 
 function now() {
   return Date.now();
@@ -32,7 +33,7 @@ export default function Search(tree,
 
     if (shouldStop && !bestMoveIsSent) {
       ensureBestMoveKnown();
-      bestMoveCb(finalBestMove);
+      bestMoveCb(finalBestMove.getMove());
       bestMoveIsSent = true;
     }
   };
@@ -53,7 +54,29 @@ export default function Search(tree,
 
   const ensureBestMoveKnown = () => {
     if (bestMoveIsSent) return;
+    if (!this.rootNode.hasChildren()) return;
+
+    finalBestMove = getBestChildNoTemperature(this.rootNode);
+  };
+
+  const getBestChildrenNoTemperature = (parent, count) => {
+
+    var edges = [];
+
+    for (var edge of parent.edges().range()) {
+
+      edges.push({ n: edge.getN(), q: edge.getQ(), p: edge.getP(), value: edge });
+    }
+
+    var res = edges.map(_ => _.value);
     
+
+    return res;
+  };
+
+  const getBestChildNoTemperature = (parent) => {
+    const res = getBestChildrenNoTemperature(parent, 1);
+    return res[0] || new EdgeAndNode();
   };
 
   this.start = () => {
