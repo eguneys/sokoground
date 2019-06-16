@@ -1,14 +1,20 @@
 import * as sokoban from './sokoban';
 
-export default function SearchWorker(search) {
+import { encodePositionForNN } from '../neural/encoder';
+import { EdgeIterator } from './node';
+
+export default function SearchWorker(search, params) {
 
   const history = search.playedHistory;
   
-  let minibatch = [];
+  let minibatch = [],
+      computation;
 
   const pickNodeToExtend = () => {
 
-    let node = search.rootNode;
+    let node = search.rootNode,
+        bestEdge = new EdgeIterator([]),
+        secondBestEdge;
 
     let isRootNode = true,
         depth = 0,
@@ -17,8 +23,9 @@ export default function SearchWorker(search) {
     while (true) {
 
       if (!nodeAlreadyUpdated) {
-        // node = bestEdge.getOrSpawnNode(node);
+        node = bestEdge.getOrSpawnNode(node);
       }
+      bestEdge.reset();
 
       depth++;
 
@@ -30,11 +37,40 @@ export default function SearchWorker(search) {
 
       nodeAlreadyUpdated = false;
 
+
+      const cpuct = computeCpuct(params, node.getN());
+      const puctMult =
+            cpuct * Math.sqrt(Math.max(node.getChildrenVisits(), 1));
+      var best = -Infinity;
+      var secondBest = -Infinity;
+      const fpu = getFpu(params, node, isRootNode);
+
+      for (var child of node.edges().range()) {
+        if (isRootNode) {
+          
+        }
+
+        const Q = child.value().getQ(fpu);
+        const score = child.value().getU(puctMult) + Q;
+
+        if (score > best) {
+          secondBest = best;
+          secondBestEdge = bestEdge;
+          best = score;
+          bestEdge = child;
+        } else if (score > secondBest) {
+          secondBest = score;
+          secondBestEdge = child;
+        }
+      }
+
+      isRootNode = false;
     }
     
   };
 
-  const initializeIteration = () => {
+  const initializeIteration = (computation_) => {
+    computation = computation_;
     minibatch = [];
   };
 
@@ -43,12 +79,11 @@ export default function SearchWorker(search) {
     minibatch.push(pickNodeToExtend());
     let pickedNode = minibatch.slice(-1)[0],
         node = pickedNode.node;
-
     if (pickedNode.isExtendable()) {
       extendNode(node);
-
       if (!node.isTerminal) {
         pickedNode.nnQueried = true;
+        addNodeToComputation(node);
       }
     }
   };
@@ -64,6 +99,11 @@ export default function SearchWorker(search) {
     }
 
     node.createEdges(legalMoves);
+  };
+
+  const addNodeToComputation = (node) => {
+    const planes = encodePositionForNN(history, 8);
+    computation.addInput(planes);
   };
 
   const runNNComputation = () => {
@@ -88,11 +128,24 @@ export default function SearchWorker(search) {
     }
 
     nodeToProcess.v = -computation.getQVal(idxInComputation);
-    nodeToProcess.d = computation.getDVal(idxInComputation);
 
     var total = 0;
-    
-    
+    for (var iEdge of node.edges().range()) {
+      var edge = iEdge.value();
+
+      var p = computation.getPVal(idxInComputation, sokoban.moveAsNNIndex(edge.getMove()));
+      edge.edge.setP(p);
+      total += edge.getP();
+    }
+
+    // normalize P values to add up to 1
+    if (total > 0) {
+      const scale = 1 / total;
+      for (iEdge of node.edges().range()) {
+        edge = iEdge.value();
+        edge.edge.setP(edge.getP() * scale);
+      }
+    }
     
   };
 
@@ -103,12 +156,24 @@ export default function SearchWorker(search) {
   };
 
   const doBackupUpdateSingleNode = (nodeToProcess) => {
+    const node = nodeToProcess.node;
     
+    const v = nodeToProcess.v;
+
+    for (var n = node, p; n !== search.rootNode.getParent(); n = p) {
+      p = n.getParent();
+
+      if (n.isTerminal) {
+        v = n.getQ();
+      }
+
+      n.finalizeScoreUpdate(v);
+    }
   };
   
   const executeOneIteration = () => {
 
-    initializeIteration();
+    initializeIteration(search.network.newComputation());
 
     gatherMiniBatch();
 
@@ -129,6 +194,16 @@ export default function SearchWorker(search) {
     step();
   };
   
+}
+
+function getFpu(params, node, isRootNode) {
+  const value = params.getFpuValue(isRootNode);
+  return value;
+}
+
+function computeCpuct(params, N) {
+  const init = params.getCpuct();
+  return init;
 }
 
 function Visit(node, depth) {

@@ -55,9 +55,16 @@
    var fen = sokoban.getFen();
    function onBestMove(move) {
      sokoban.move(move);
+     engine.stop();
+     setTimeout(() => {
+       engine.setPosition(sokoban.getFen());
+       engine.go({
+         searchDeadline: Date.now() + 2000
+       });
+     }, 100);
    }
    
-   var engine = new Sokoban.Engine(onBestMove, fen);
+   var engine = new Sokoban.Engine(onBestMove, {});
 
    engine.setPosition(fen);
 

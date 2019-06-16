@@ -1,16 +1,22 @@
 import SearchWorker from './worker';
 import { EdgeAndNode } from './node';
+import SearchParams from './params';
 
 function now() {
   return Date.now();
 }
 
 export default function Search(tree,
+                               network,
                                bestMoveCb,
-                               limits) {
+                               limits,
+                               options) {
 
   this.playedHistory = 
     tree.getPositionHistory();
+  this.network = network;
+
+  const params = new SearchParams(options);
 
   let shouldStop = false,
       bestMoveIsSent = false,
@@ -63,14 +69,27 @@ export default function Search(tree,
 
     var edges = [];
 
-    for (var edge of parent.edges().range()) {
-
-      edges.push({ n: edge.getN(), q: edge.getQ(), p: edge.getP(), value: edge });
+    for (var iEdge of parent.edges().range()) {
+      var edge = iEdge.value();
+      edges.push({ n: edge.getN(), q: edge.getQ(0), p: edge.getP(), value: edge });
     }
+    edges.sort((a, b) => {
+      var n = b.n - a.n,
+          q = n,
+          p = n;
+
+      if (n === 0) {
+        q = b.q - a.q;
+        if (q === 0) {
+          p = b.p - a.p;
+        }
+      }
+      return p;
+    });
+
+    // console.log(edges.map(_ => _.n + _.value.getMove()));
 
     var res = edges.map(_ => _.value);
-    
-
     return res;
   };
 
@@ -82,7 +101,7 @@ export default function Search(tree,
   this.start = () => {
     WatchdogThread();
 
-    var worker = new SearchWorker(this);
+    var worker = new SearchWorker(this, params);
     worker.Run();
   };
 

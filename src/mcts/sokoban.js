@@ -1,3 +1,4 @@
+import stringHash from 'string-hash';
 import { read as fenRead } from '../fen';
 import * as board from '../board';
 
@@ -7,10 +8,52 @@ const invRoles = { 'wall': '#', 'target': '.', 'space': ' ', 'box': '$', 'boxtar
 
 export default function Sokoban() {
 
+  this.piecesSquares = () => {
+    if (!this._pieces) {
+      this._pieces = fenRead(this.fen);
+    }
+    return this._pieces;
+  };
+
   this.setFromFen = (fen) => {
     this.fen = fen;
   };
 
+  const encodePiece = (role) => {
+    return function() {
+      let res = "";
+      const { pieces, squares } = this.piecesSquares();
+
+      for (var key of Object.keys(pieces)) {
+        var piece = pieces[key];
+        if (piece.role === role)
+          res += key;
+      }
+      return stringHash(res);
+    };
+  };
+
+  const encodeSquare = (role) => {
+    return function() {
+      let res = "";
+      const { pieces, squares } = this.piecesSquares();
+
+      for (var key of Object.keys(squares)) {
+        var square = squares[key];
+        if (square.role === role)
+          res += key;
+      }
+      return stringHash(res);
+    };
+  };
+
+  this.boxes = encodePiece('box');
+
+  this.char = encodePiece('char');
+
+  this.targets = encodeSquare('target');
+
+  this.walls = encodeSquare('wall');
 
   this.isEnd = () => {
     return this.fen.indexOf(invRoles['box']) === -1;
@@ -18,8 +61,13 @@ export default function Sokoban() {
 
   this.getLegalMoves = () => {
 
-    const { pieces, squares } = fenRead(this.fen);
+    const { pieces, squares } = this.piecesSquares();
 
     return board.legalMoves({ pieces, squares});
   };
+}
+
+export function moveAsNNIndex(move) {
+  const moves = ['up', 'left', 'down', 'right'];
+  return moves.indexOf(move);
 }

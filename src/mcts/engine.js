@@ -1,12 +1,24 @@
 import { NodeTree } from './node';
 import Search from './search';
+import { populate as searchParamsPopulate } from './params';
 
-export function Engine(bestMoveCb, opts) {
+import NetworkFactory from '../neural/factory';
+
+export function Engine(bestMoveCb, options) {
   var currentPosition,
       tree,
+      network,
       search;
 
+  populateOptions(options);
+
+  const updateFromUciOptions = () => {
+    network = NetworkFactory.LoadNetwork(options);
+  };
+
   const setupPosition = (fen) => {
+    updateFromUciOptions();
+    
     if (!tree) {
       tree = new NodeTree();
     }
@@ -26,8 +38,10 @@ export function Engine(bestMoveCb, opts) {
     };
 
     search = new Search(tree,
+                        network,
                         bestMoveCb,
-                        limits);
+                        limits,
+                        options);
 
     search.start();
   };
@@ -38,4 +52,9 @@ export function Engine(bestMoveCb, opts) {
     }
   };
 
+}
+
+function populateOptions(options) {
+  NetworkFactory.populateOptions(options);
+  searchParamsPopulate(options);
 }
