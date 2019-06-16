@@ -39,8 +39,8 @@ export default function PositionHistory() {
   };
 
   this.append = (move) => {
-    this.last().getBoard().applyMove(move);
-    positions.push(this.last());
+    const lastBoard = this.last().getBoard().applyMove(move);
+    positions.push(new Position(this.last().getBoard()));
     this.last().setRepetitions(computeLastMoveRepetitions());
   };
 

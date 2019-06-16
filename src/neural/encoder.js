@@ -1,7 +1,7 @@
 import { InputPlane } from './network';
 
 const kMoveHistory = 8;
-const kPlanesPerBoard = 6;
+const kPlanesPerBoard = 7;
 const kAuxPlaneBase = kPlanesPerBoard * kMoveHistory;
 
 export function encodePositionForNN(history, historyPlanes) {
@@ -33,8 +33,8 @@ export function encodePositionForNN(history, historyPlanes) {
 
     const repetitions = position.getRepetitions();
     if (repetitions >= 1) result[base + 4].setAll();
-    //if (repetitions >= 3) result[base + 5].setAll();
-
+    if (repetitions >= 3) result[base + 5].setAll();
+    // if (repetitions >= 10) result[base + 6].setAll();
   }
 
   return result;

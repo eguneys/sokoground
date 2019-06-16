@@ -9,23 +9,30 @@ const invRoles = { 'wall': '#', 'target': '.', 'space': ' ', 'box': '$', 'boxtar
 
 export default function Sokoban() {
 
-  this.applyMove = (dir) => {
-    switch (dir) {
+  this.applyMove = (dirS) => {
+    var dir;
+    switch (dirS) {
     case 'up':
       dir = move.dirUp;
       break;
     case 'left':
       dir = move.dirLeft;
+      break;
     case 'right':
       dir = move.dirRight;
+      break;
     case 'down':
       dir = move.dirDown;
+      break;
     }
     var s = this.piecesSquares();
     var { orig, dest, dest2 } = move.dests(s, dir);
 
-    board.apiMove({ ...s, events: {} }, orig, dest, dest2);
+    if (!board.apiMove({ ...s, events: {} }, orig, dest, dest2)) {
+      throw new Error("bad move " + dirS + "\n" + this.fen);
+    }
     this.fen = fenWrite(s.squares, s.pieces);
+    this._pieces = null;
   };
 
   this.piecesSquares = () => {
@@ -37,6 +44,7 @@ export default function Sokoban() {
 
   this.setFromFen = (fen) => {
     this.fen = fen;
+    this._pieces = null;
   };
 
   const encodePiece = (role) => {

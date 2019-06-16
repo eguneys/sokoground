@@ -35,11 +35,11 @@ function RandomNetworkComputation() {
   };
 
   this.getQVal = (sample) => {
-    return ((inputs[sample] % 2000000) - 1000000) / 1000000;
+    return ((inputs[sample] % 0xffffffff) - (0xffffffff / 2)) / 0xffffffff;
   };
 
   this.getPVal = (sample, moveId) => {
-    return (HashCat(inputs[sample], moveId) % 200000) / 200000;
+    return (HashCat(inputs[sample], moveId) % 0xfffffff) / 0xfffffff;
   };
 }
 

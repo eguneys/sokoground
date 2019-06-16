@@ -102,6 +102,7 @@ export default function SearchWorker(search, params) {
       toAdd.push(prev.getEdgeToNode(cur).getMove());
       cur = prev;
     }
+
     for (var i = toAdd.length - 1; i >= 0; i--) {
       history.append(toAdd[i]);
     }

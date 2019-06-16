@@ -46,6 +46,7 @@ function baseMove(s, orig, dest, dest2) {
   delete s.pieces[orig];
 
   callUserFunction(s.events.move);
+  return true;
 }
 
 export function canMove(s, orig, dest, dest2) {
@@ -64,6 +65,7 @@ export function canMove(s, orig, dest, dest2) {
 
 export function apiMove(s, orig, dest, dest2) {
   if (canMove(s, orig, dest, dest2)) {
-    baseMove(s, orig, dest, dest2);
+    return baseMove(s, orig, dest, dest2);
   }
+  return false;
 }
