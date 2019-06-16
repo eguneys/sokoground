@@ -12,7 +12,7 @@ import NetworkFactory from './factory';
 // }
 
 function HashCat(hash, x) {
-  return stringHash(hash + x + "");
+  return stringHash(hash + " " + x);
 }
 
 function RandomNetworkComputation() {
@@ -35,11 +35,11 @@ function RandomNetworkComputation() {
   };
 
   this.getQVal = (sample) => {
-    return ((inputs[sample] % 200000) - 100000) / 100000;
+    return ((inputs[sample] % 2000000) - 1000000) / 1000000;
   };
 
   this.getPVal = (sample, moveId) => {
-    return (HashCat(inputs[sample], moveId) % 10000) / 10000;
+    return (HashCat(inputs[sample], moveId) % 200000) / 200000;
   };
 }
 
