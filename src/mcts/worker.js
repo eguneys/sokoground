@@ -2,6 +2,7 @@ import * as sokoban from './sokoban';
 
 import { encodePositionForNN } from '../neural/encoder';
 import { EdgeIterator } from './node';
+import * as util from './util';
 
 export default function SearchWorker(search, params) {
 
@@ -23,6 +24,8 @@ export default function SearchWorker(search, params) {
     while (true) {
 
       if (!nodeAlreadyUpdated) {
+        // if (depth < 4)
+        //   console.log((search.rootNode.toShortString(2)));
         node = bestEdge.getOrSpawnNode(node);
       }
       bestEdge.reset();
@@ -89,6 +92,23 @@ export default function SearchWorker(search, params) {
   };
 
   const extendNode = (node) => {
+    history.trim(search.playedHistory.getLength());
+
+    const toAdd = [];
+
+    let cur = node;
+    while (cur !== search.rootNode) {
+      let prev = cur.getParent();
+      toAdd.push(prev.getEdgeToNode(cur).getMove());
+      cur = prev;
+    }
+    for (var i = toAdd.length - 1; i >= 0; i--) {
+      history.append(toAdd[i]);
+    }
+
+    console.log(toAdd);
+
+
     const board = history.last(),
           legalMoves = board.getLegalMoves(),
           isEnd = board.isEnd();

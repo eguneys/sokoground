@@ -1,6 +1,8 @@
 import Sokoban from './sokoban';
 import PositionHistory from './position';
 
+import { roundTo } from './util';
+
 export function NodeTree() {
   let currentHead,
       gameBeginNode,
@@ -113,6 +115,11 @@ export function Node(parent, index) {
   this.getN = () => {
     return n;
   };
+
+  this.getNStarted = () => {
+    return n;
+  };
+
   this.getChildrenVisits = () => {
     return n > 0 ? n - 1 : 0;
   };
@@ -129,6 +136,15 @@ export function Node(parent, index) {
     return edges.length > 0;
   };
 
+  // for a child node returns corresponding edge
+  this.getEdgeToNode = (node) => {
+    return edges[node.index];
+  };
+
+  this.getOwnEdge = () => {
+    return this.getParent().getEdgeToNode(this);
+  };
+
   this.toString = () => {
     var res = `<node${this.index} q=${q} n=${n}>`;
     for (var iEdge of this.edges().range()) {
@@ -138,6 +154,17 @@ export function Node(parent, index) {
     res += "</node>";
     return res;
   };
+
+  this.toShortString = (n, spaces = "") => {
+    var indent = "  ";
+    var res = spaces + indent + `<node ${this.index} q=${roundTo(q)} n=${roundTo(n)}>`;
+    for (var iEdge of this.edges().range()) {
+      var edge = iEdge.value();
+      res += "\n" + spaces + indent + edge.toShortString(n, spaces + indent) + "\n";
+    }
+    res += spaces + indent + "</node>";
+    return res;
+  };  
 }
 
 export function EdgeAndNode(edge, node) {
@@ -151,7 +178,7 @@ export function EdgeAndNode(edge, node) {
   this.getN = () => {
     return this.node ? this.node.getN() : 0;
   };
-  this.getNStarted = () => { return 0; };
+  this.getNStarted = () => { return this.node ? this.node.getNStarted() : 0; };
 
 
   this.getP = () => {
@@ -171,9 +198,17 @@ export function EdgeAndNode(edge, node) {
 
   this.toString = () => {
     var res =
-        [`<edge m=${this.edge.getMove()} p=${this.edge.getP()}>`,
+        [`<edge m=${this.edge.getMove()} p=${roundTo(this.edge.getP())}>`,
          this.node?this.node.toString():".",
          "</edge>"].join("");
+    return res;
+  };
+
+  this.toShortString = (n, spaces) => {
+    var res =
+        [`<${this.edge.getMove()} p=${roundTo(this.edge.getP())}>`,
+         (this.node&&n > 0)?"\n"+node.toShortString(n-1, spaces):".",
+         `</${this.edge.getMove()}>`].join("");
     return res;
   };
 }

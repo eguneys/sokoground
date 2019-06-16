@@ -1,12 +1,32 @@
 import stringHash from 'string-hash';
-import { read as fenRead } from '../fen';
+import { write as fenWrite, read as fenRead } from '../fen';
 import * as board from '../board';
+import * as move from '../move';
 
 const roles = { '#': 'wall', '.': 'target', ' ': 'space', '$': 'box', '*': 'boxtarget', '@': 'char' };
 
 const invRoles = { 'wall': '#', 'target': '.', 'space': ' ', 'box': '$', 'boxtarget': '*', 'char': '@' };
 
 export default function Sokoban() {
+
+  this.applyMove = (dir) => {
+    switch (dir) {
+    case 'up':
+      dir = move.dirUp;
+      break;
+    case 'left':
+      dir = move.dirLeft;
+    case 'right':
+      dir = move.dirRight;
+    case 'down':
+      dir = move.dirDown;
+    }
+    var s = this.piecesSquares();
+    var { orig, dest, dest2 } = move.dests(s, dir);
+
+    board.apiMove({ ...s, events: {} }, orig, dest, dest2);
+    this.fen = fenWrite(s.squares, s.pieces);
+  };
 
   this.piecesSquares = () => {
     if (!this._pieces) {

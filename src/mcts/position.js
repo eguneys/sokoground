@@ -9,6 +9,10 @@ export default function PositionHistory() {
     return positions[idx];
   };
 
+  this.trim = (size) => {
+    positions = positions.slice(0, size);
+  };
+
   this.getLength = () => {
     return positions.length;
   };
@@ -19,6 +23,7 @@ export default function PositionHistory() {
   };
 
   this.append = (move) => {
-    
+    this.last().applyMove(move);
+    positions.push(this.last());
   };
 };

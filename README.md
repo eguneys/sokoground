@@ -2,6 +2,14 @@
 
 ![Classic Sokoban](https://github.com/eguneys/sokoground/blob/master/assets/soko.gif)
 
+
+To run:
+
+    yarn install
+    yarn start
+
+visit: `http://localhost:3000`
+
 ## Useful links
 
 https://github.com/LeelaChessZero/lc0
