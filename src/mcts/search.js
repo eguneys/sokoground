@@ -87,7 +87,7 @@ export default function Search(tree,
       return p;
     });
 
-    // console.log(edges.map(_ => _.n + _.value.getMove()));
+    console.log(edges.map(_ => _.n + _.value.getMove()));
 
     var res = edges.map(_ => _.value);
     return res;

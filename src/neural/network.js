@@ -4,7 +4,7 @@ export function InputPlane() {
   this.value = 1;
 
   this.setAll = () => {
-    this.mask = 0xffffff;
+    this.mask = 0xffffffff;
   };
 
   this.fill = (val) => {

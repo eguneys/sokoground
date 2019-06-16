@@ -1,7 +1,7 @@
 import { InputPlane } from './network';
 
 const kMoveHistory = 8;
-const kPlanesPerBoard = 4;
+const kPlanesPerBoard = 5;
 const kAuxPlaneBase = kPlanesPerBoard * kMoveHistory;
 
 export function encodePositionForNN(history, historyPlanes) {
@@ -12,7 +12,8 @@ export function encodePositionForNN(history, historyPlanes) {
     result[j] = new InputPlane();
   }
 
-  const board = history.last();
+  const position = history.last();
+  const board = position.getBoard();
   result[kAuxPlaneBase + 0].setAll();
   
 
@@ -29,6 +30,10 @@ export function encodePositionForNN(history, historyPlanes) {
     result[base + 1].mask = (board.char());
     result[base + 2].mask = (board.targets());
     result[base + 3].mask = (board.walls());
+
+    const repetitions = position.getRepetitions();
+    if (repetitions >= 1) result[base + 4].setAll();
+
   }
 
   return result;

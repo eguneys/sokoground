@@ -106,10 +106,7 @@ export default function SearchWorker(search, params) {
       history.append(toAdd[i]);
     }
 
-    console.log(toAdd);
-
-
-    const board = history.last(),
+    const board = history.last().getBoard(),
           legalMoves = board.getLegalMoves(),
           isEnd = board.isEnd();
 
