@@ -1,8 +1,8 @@
 import { pos2key } from './util';
 
-const roles = { '#': 'wall', '.': 'target', ' ': 'space', '$': 'box', '*': 'boxtarget', '@': 'char' };
+const roles = { '#': 'wall', '.': 'target', ' ': 'space', '$': 'box', '*': 'boxtarget', '@': 'char', 'o': 'chartarget' };
 
-const invRoles = { 'wall': '#', 'target': '.', 'space': ' ', 'box': '$', 'boxtarget': '*', 'char': '@' };
+const invRoles = { 'wall': '#', 'target': '.', 'space': ' ', 'box': '$', 'boxtarget': '*', 'char': '@', 'chartarget': 'o' };
 
 export function read(fen) {
   var split = fen.split(';');
@@ -63,6 +63,14 @@ export function read(fen) {
           role: 'box'
         };
         break;
+      case 'chartarget':
+        squares[pos2key([col, row])] = {
+          role: 'target'
+        };
+        pieces[pos2key([col, row])] = {
+          role: 'char'
+        };
+        break;
       default:
         squares[pos2key([col, row])] = {
           role: roles[role]
@@ -90,7 +98,11 @@ export function write(squares, pieces, noPushPly) {
             char = invRoles['boxtarget'];
           }
         } else {
-          char = invRoles['char'];
+          if (square.role === 'space') {
+            char = invRoles['char'];
+          } else {
+            char = invRoles['chartarget'];
+          }
         }
       } else {
         char = invRoles[square.role];

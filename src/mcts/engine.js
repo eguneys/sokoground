@@ -16,22 +16,22 @@ export function Engine(bestMoveCb, options) {
     network = NetworkFactory.LoadNetwork(options);
   };
 
-  const setupPosition = (fen) => {
+  const setupPosition = (fen, moves) => {
     updateFromUciOptions();
     
     if (!tree) {
       tree = new NodeTree();
     }
-    tree.resetToPosition(fen);
+    tree.resetToPosition(fen, moves);
   };
 
-  this.setPosition = (fen) => {
-    currentPosition = { fen };
+  this.setPosition = (fen, moves = []) => {
+    currentPosition = { fen, moves };
   };
   
   this.go = (params) => {
 
-    setupPosition(currentPosition.fen);
+    setupPosition(currentPosition.fen, currentPosition.moves);
 
     const limits = {
       searchDeadline: params.searchDeadline

@@ -13,8 +13,12 @@ export function NodeTree() {
     currentHead = null;
   };
 
+
+  const makeMove = (move) => {
+    history.append(move);
+  };
   
-  this.resetToPosition = (fen) => {
+  this.resetToPosition = (fen, moves) => {
     const startingBoard = new Sokoban();
 
     const { noPushPly } = startingBoard.setFromFen(fen);
@@ -30,6 +34,10 @@ export function NodeTree() {
     history.reset(startingBoard, noPushPly);
 
     currentHead = gameBeginNode;
+
+    for (const move of moves) {
+      makeMove(move);
+    }
 
   };
 
@@ -116,6 +124,10 @@ export function Node(parent, index) {
   };
 
   this.finalizeScoreUpdate = (v, multivisit = 1) => {
+    if (q + multivisit * (v - q) / (n + multivisit) === 1) {
+      debugger;
+    }
+
     q += multivisit * (v - q) / (n + multivisit);
 
     n += multivisit;
@@ -174,12 +186,12 @@ export function Node(parent, index) {
     return res;
   };
 
-  this.toShortString = (x, spaces = "") => {
+  this.toShortString = (x, opts = {}, spaces = "") => {
     var indent = "  ";
     var res = spaces + indent + `<node ${this.index} q=${roundTo(q)} n=${roundTo(n)}>`;
     for (var iEdge of this.edges().range()) {
       var edge = iEdge.value();
-      res += "\n" + spaces + indent + edge.toShortString(x, spaces + indent) + "\n";
+      res += "\n" + spaces + indent + edge.toShortString(x, opts, spaces + indent) + "\n";
     }
     res += spaces + indent + "</node>";
     return res;
@@ -227,10 +239,15 @@ export function EdgeAndNode(edge, node) {
     return res;
   };
 
-  this.toShortString = (x, spaces) => {
+  this.toShortString = (x, opts = {}, spaces) => {
+    if (opts.discardLoss && this.getQ(0) === -1) {
+      if (opts.discardLoss === 'hidden')
+        return '';
+      return `<${this.edge.getMove()} loss/>`;
+    }
     var res =
         [`<${this.edge.getMove()} p=${roundTo(this.edge.getP())}>`,
-         (this.node&&x > 0)?"\n"+node.toShortString(x-1, spaces):".",
+         (this.node&&x > 0)?"\n"+node.toShortString(x-1, opts, spaces):".",
          `</${this.edge.getMove()}>`].join("");
     return res;
   };

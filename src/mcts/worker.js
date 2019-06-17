@@ -25,8 +25,6 @@ export default function SearchWorker(search, params) {
     while (true) {
 
       if (!nodeAlreadyUpdated) {
-        // if (depth < 4)
-        //   console.log((search.rootNode.toShortString(2)));
         node = bestEdge.getOrSpawnNode(node);
       }
       bestEdge.reset();
@@ -54,13 +52,19 @@ export default function SearchWorker(search, params) {
       var secondBest = -Infinity;
       const fpu = getFpu(params, node, isRootNode);
 
+      let possibleMoves = 0;
+
+      const cs = [];
+
       for (var child of node.edges().range()) {
         if (isRootNode) {
-          
+          possibleMoves++;
         }
 
         const Q = child.value().getQ(fpu);
         const score = child.value().getU(puctMult) + Q;
+
+        cs.push({ Q, score, q: child.value().getQ(fpu) });
 
         if (score > best) {
           secondBest = best;
@@ -73,6 +77,14 @@ export default function SearchWorker(search, params) {
         }
       }
 
+      if (best < -0.5) {
+        // console.log(history.last().getBoard().fen);
+        // console.log(depth, cs, best);
+      }
+
+      if (isRootNode && possibleMoves <= 1) {
+        search.onlyOnePossibleMoveLeft = true;
+      }
       isRootNode = false;
     }
     
@@ -139,7 +151,12 @@ export default function SearchWorker(search, params) {
     }
 
     if (node !== search.rootNode) {
-      if (history.last().getNoPush() >= 10) {
+      if (history.last().getNoPush() >= params.getNoPushValue()) {
+        node.makeTerminal('lose');
+        return;
+      }
+
+      if (history.last().getRepetitions() >= 1) {
         node.makeTerminal('lose');
         return;
       }
@@ -214,7 +231,6 @@ export default function SearchWorker(search, params) {
     let canConvert = node.isTerminal && !node.getN();
 
     let v = nodeToProcess.v;
-
     for (var n = node, p; n !== search.rootNode.getParent(); n = p) {
       p = n.getParent();
 
@@ -222,9 +238,12 @@ export default function SearchWorker(search, params) {
         v = n.getQ();
       }
 
+      if (n.isTerminal) {
+        // debugger;
+      }
+
       n.finalizeScoreUpdate(v);
       
-
       canConvert = canConvert && p != search.rootNode && !p.isTerminal;
 
       if (canConvert && v != 1) {

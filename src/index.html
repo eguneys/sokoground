@@ -25,7 +25,7 @@
     <button id="nextLevel"> Next Level </button>
     <button id="prevLevel"> Previous Level </button>
 
-    <input id="searchTime" type="range" min="100", max="30000" value="1000"> Search Time </input>
+    <input id="searchTime" type="range" min="100", max="60000" value="1000"> Search Time </input>
   </div>
 
   <div class="hud">
@@ -56,15 +56,18 @@
 
  function initAi(sokoban) {
 
+   const initialFen = sokoban.getFen();
+   const moves = [];
    function onBestMove(move) {
      sokoban.move(move);
+     moves.push(move);
      setTimeout(reset, 0);
    }
 
    function reset() {
      var fen = sokoban.getFen();
      engine.stop();
-     engine.setPosition(fen);
+     engine.setPosition(initialFen, moves);
      engine.go({
        searchDeadline: Date.now() + kSearchTime
      });

@@ -32,6 +32,9 @@ export default function Search(tree,
   const maybeTriggerStop = () => {
     if (bestMoveIsSent) return;
     if (!shouldStop) {
+      if (this.onlyOnePossibleMoveLeft) {
+        fireStopInternal();
+      }
       if (limits.searchDeadline && getTimeToDeadline() <= 0) {
         fireStopInternal();
       }
@@ -66,6 +69,8 @@ export default function Search(tree,
   };
 
   const getBestChildrenNoTemperature = (parent, count) => {
+
+    // console.log(parent.toShortString(2, { discardLoss: false }));
 
     var edges = [];
 

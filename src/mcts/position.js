@@ -68,12 +68,16 @@ export default function PositionHistory(other) {
 
   const computeLastMoveRepetitions = () => {
     const last = this.last();
-    for (var idx = positions.length - 3; idx >= 0; idx -= 2) {
+    for (var idx = positions.length - 2; idx >= 0; idx--) {
       const pos = positions[idx];
-      if (pos.getBoard() == last.getBoard()) {
+      if (justBoardFen(pos.getBoard().fen) === justBoardFen(last.getBoard().fen)) {
         return 1 + pos.getRepetitions();
       }
     }
     return 0;
   };
 };
+
+function justBoardFen(fen) {
+  return fen.split(';')[0];
+}
