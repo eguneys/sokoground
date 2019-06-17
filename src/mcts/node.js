@@ -17,7 +17,7 @@ export function NodeTree() {
   this.resetToPosition = (fen) => {
     const startingBoard = new Sokoban();
 
-    startingBoard.setFromFen(fen);
+    const { noPushPly } = startingBoard.setFromFen(fen);
 
     if (gameBeginNode) {
       deallocateTree();
@@ -27,7 +27,7 @@ export function NodeTree() {
       gameBeginNode = new Node(null, 0);
     }
 
-    history.reset(startingBoard);
+    history.reset(startingBoard, noPushPly);
 
     currentHead = gameBeginNode;
 
@@ -77,7 +77,10 @@ export function Node(parent, index) {
   // Average value of all visited nodes in subtree.
   let q = 0,
       // How many completed visits this node had.
-      n = 0;
+      n = 0,
+      // how many threads currently process this node
+      // (started but not finished).
+      nInFlight = 0;
 
   this.parent = parent;
   this.sibling = null;
@@ -93,15 +96,31 @@ export function Node(parent, index) {
     edges = moves.map(_ => new Edge(_));
   };
 
-  this.makeTerminal = () => {
+  this.makeTerminal = (result) => {
     this.isTerminal = true;
-    q = 1;
+    if (result === 'lose') {
+      q = -1;
+    } else {
+      q = 1;
+    }
+  };
+
+  this.tryStartScoreUpdate = () => {
+    if (n === 0 && nInFlight > 0) return false;
+    nInFlight++;
+    return true;
+  };
+
+  this.cancelScoreUpdate = (multivisit = 1) => {
+    nInFlight -= multivisit;
   };
 
   this.finalizeScoreUpdate = (v, multivisit = 1) => {
     q += multivisit * (v - q) / (n + multivisit);
 
     n += multivisit;
+
+    nInFlight -= multivisit;
   };
 
   this.getParent = () => {
@@ -117,7 +136,7 @@ export function Node(parent, index) {
   };
 
   this.getNStarted = () => {
-    return n;
+    return n + nInFlight;
   };
 
   this.getChildrenVisits = () => {
@@ -179,6 +198,10 @@ export function EdgeAndNode(edge, node) {
     return this.node ? this.node.getN() : 0;
   };
   this.getNStarted = () => { return this.node ? this.node.getNStarted() : 0; };
+
+  this.isTerminal = () => {
+    return this.node ? this.node.isTerminal : false;
+  };
 
 
   this.getP = () => {

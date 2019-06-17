@@ -1,10 +1,17 @@
 import Sokoban from './sokoban';
 
-function Position(board) {
+function Position(board, noPushPly) {
+
+  this.noPushPly = noPushPly;
+
   let repetitions = 0;
 
   this.getBoard = () => {
     return board;
+  };
+
+  this.getNoPush = () => {
+    return this.noPushPly;
   };
 
   this.setRepetitions = (n) => {
@@ -15,6 +22,13 @@ function Position(board) {
     return repetitions;
   };
 }
+
+Position.fromParent = (parent, move) => {
+  const board = new Sokoban();
+  board.setFromFen(parent.getBoard().fen);
+  const isPush = board.applyMove(move);
+  return new Position(board, isPush ? 0 : parent.noPushPly + 1);
+};
 
 export default function PositionHistory(other) {
   var positions = [];
@@ -42,16 +56,13 @@ export default function PositionHistory(other) {
     return positions.length;
   };
 
-  this.reset = (board) => {
+  this.reset = (board, noPushPly) => {
     positions = [];
-    positions.push(new Position(board));
+    positions.push(new Position(board, noPushPly));
   };
 
   this.append = (move) => {
-    const lastBoard = new Sokoban();
-    lastBoard.setFromFen(this.last().getBoard().fen);
-    lastBoard.applyMove(move);
-    positions.push(new Position(lastBoard));
+    positions.push(Position.fromParent(this.last(), move));
     this.last().setRepetitions(computeLastMoveRepetitions());
   };
 

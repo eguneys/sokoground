@@ -5,6 +5,9 @@ const roles = { '#': 'wall', '.': 'target', ' ': 'space', '$': 'box', '*': 'boxt
 const invRoles = { 'wall': '#', 'target': '.', 'space': ' ', 'box': '$', 'boxtarget': '*', 'char': '@' };
 
 export function read(fen) {
+  var split = fen.split(';');
+  var noPushPly = parseInt(split[1] || '0');
+  fen = fen.split(';')[0];
   var squares = {};
   var pieces = {};
   const lines = fen.split('\n');
@@ -16,7 +19,7 @@ export function read(fen) {
     lines.push("#");
   }
 
-  lines.forEach((line, row) => {
+  lines.slice(0, 20).forEach((line, row) => {
     while (line.length < maxColumns) {
       line = line + " ";
     }
@@ -68,16 +71,16 @@ export function read(fen) {
     }
   });
 
-  return { squares, pieces };
+  return { squares, pieces, noPushPly };
 };
 
-export function write(squares, pieces) {
+export function write(squares, pieces, noPushPly) {
   var res = '';
-  for (var x = 0; x < 20; x++) {
+  for (var row = 0; row < 20; row++) {
     var line = '';
-    for (var y = 0; y < 20; y++) {
-      const square = squares[pos2key([y, x])];
-      const piece = pieces[pos2key([y, x])];
+    for (var col = 0; col < 20; col++) {
+      const square = squares[pos2key([col, row])];
+      const piece = pieces[pos2key([col, row])];
       var char;
       if (piece) {
         if (piece.role === 'box') {
@@ -96,6 +99,8 @@ export function write(squares, pieces) {
     }
     res += line + '\n';
   }
+  if (noPushPly) 
+    res +=  ';' + noPushPly;
   return res;
 }
 

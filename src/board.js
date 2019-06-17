@@ -41,6 +41,9 @@ export function legalMoves(s) {
 function baseMove(s, orig, dest, dest2) {
   if (s.pieces[dest]) {
     s.pieces[dest2] = s.pieces[dest];
+    s.noPushPly = 0;
+  } else {
+    s.noPushPly++;
   }
   s.pieces[dest] = s.pieces[orig];
   delete s.pieces[orig];

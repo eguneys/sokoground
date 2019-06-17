@@ -30,6 +30,7 @@ export default function Sokoban() {
 
     if (!board.apiMove({ ...s, events: {} }, orig, dest, dest2)) {
       throw new Error("bad move " + dirS + "\n" + this.fen);
+      
     }
     this.fen = fenWrite(s.squares, s.pieces);
     this._pieces = null;
@@ -45,6 +46,10 @@ export default function Sokoban() {
   this.setFromFen = (fen) => {
     this.fen = fen;
     this._pieces = null;
+
+    const { noPushPly } = this.piecesSquares();
+
+    return { noPushPly };
   };
 
   const encodePiece = (role) => {

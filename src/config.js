@@ -8,9 +8,10 @@ export function configure(state, config) {
     config.fen = state.levels[state.level - 1];
   }
   if (config.fen) {
-    const { squares, pieces } = fenRead(config.fen);
+    const { squares, pieces, noPushPly } = fenRead(config.fen);
     state.squares = squares;
     state.pieces = pieces;
+    state.noPushPly = noPushPly;
   }
 
 }

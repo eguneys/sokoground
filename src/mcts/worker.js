@@ -33,7 +33,12 @@ export default function SearchWorker(search, params) {
 
       depth++;
 
-      // node.tryStartScoreUpdate();
+      if (!node.tryStartScoreUpdate()) {
+        // if (!isRootNode) {
+          
+        // }
+        return Collision(node, depth);
+      }
 
       if (node.isTerminal || !node.hasChildren()) {
         return Visit(node, depth);
@@ -80,16 +85,31 @@ export default function SearchWorker(search, params) {
 
   const gatherMiniBatch = () => {
 
-    minibatch.push(pickNodeToExtend());
-    let pickedNode = minibatch.slice(-1)[0],
-        node = pickedNode.node;
-    if (pickedNode.isExtendable()) {
-      extendNode(node);
-      if (!node.isTerminal) {
-        pickedNode.nnQueried = true;
-        addNodeToComputation(node);
+    var minibatchSize = 0;
+    var collisionEventsLeft = 10;
+
+    while (minibatchSize < 10) {
+      minibatch.push(pickNodeToExtend());
+      let pickedNode = minibatch.slice(-1)[0],
+          node = pickedNode.node;
+
+      if (pickedNode.isCollision()) {
+        if (--collisionEventsLeft <= 0) return;
+        if (!search.isSearchActive()) return;
+        continue;
+      }
+
+      minibatchSize++;
+
+      if (pickedNode.isExtendable()) {
+        extendNode(node);
+        if (!node.isTerminal) {
+          pickedNode.nnQueried = true;
+          addNodeToComputation(node);
+        }
       }
     }
+    // console.log(minibatch.map(_ => _.isExtendable()));
   };
 
   const extendNode = (node) => {
@@ -113,11 +133,16 @@ export default function SearchWorker(search, params) {
           legalMoves = board.getLegalMoves(),
           isEnd = board.isEnd();
 
-    console.log(board.fen);
-
     if (isEnd) {
-      node.makeTerminal();
+      node.makeTerminal('win');
       return;
+    }
+
+    if (node !== search.rootNode) {
+      if (history.last().getNoPush() >= 10) {
+        node.makeTerminal('lose');
+        return;
+      }
     }
 
     node.createEdges(legalMoves);
@@ -145,7 +170,6 @@ export default function SearchWorker(search, params) {
 
     if (!nodeToProcess.nnQueried) {
       nodeToProcess.v = node.getQ();
-      nodeToProcess.d = node.getD();
       return;
     }
 
@@ -178,9 +202,18 @@ export default function SearchWorker(search, params) {
   };
 
   const doBackupUpdateSingleNode = (nodeToProcess) => {
-    const node = nodeToProcess.node;
+    let node = nodeToProcess.node;
     
-    const v = nodeToProcess.v;
+    if (nodeToProcess.isCollision()) {
+      for (node = node.getParent(); node !== search.rootNode.getParent(); node = node.getParent()) {
+        node.cancelScoreUpdate();
+      }
+      return;
+    }
+
+    let canConvert = node.isTerminal && !node.getN();
+
+    let v = nodeToProcess.v;
 
     for (var n = node, p; n !== search.rootNode.getParent(); n = p) {
       p = n.getParent();
@@ -190,6 +223,21 @@ export default function SearchWorker(search, params) {
       }
 
       n.finalizeScoreUpdate(v);
+      
+
+      canConvert = canConvert && p != search.rootNode && !p.isTerminal;
+
+      if (canConvert && v != 1) {
+        for (var iEdge of p.edges().range()) {
+          var edge = iEdge.value();
+          canConvert = canConvert && edge.isTerminal() && edge.getQ(0) === v;
+        }
+      }
+
+      if (canConvert) {
+        p.makeTerminal(v === 1 ? 'lose' : 'win');
+      }
+
     }
   };
   
@@ -229,16 +277,23 @@ function computeCpuct(params, N) {
 }
 
 function Visit(node, depth) {
-  return new NodeToProcess(node, depth);
+  return new NodeToProcess(node, depth, false);
 }
 
-function NodeToProcess(node, depth) {
+function Collision(node, depth) {
+  return new NodeToProcess(node, depth, true);
+}
+
+function NodeToProcess(node, depth, isCollision) {
+
   this.node = node;
-  this.depth = depth;
 
   this.nnQueried = false;
 
   this.isExtendable = () => {
-    return !node.isTerminal;
+    return !isCollision && !node.isTerminal;
+  };
+  this.isCollision = () => {
+    return isCollision;
   };
 }

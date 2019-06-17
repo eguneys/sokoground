@@ -9,7 +9,9 @@ export function start(state, redraw) {
       render(state => configure(state, config), state);
     },
     getFen() {
-      return fenWrite(state.squares, state.pieces);
+      return fenWrite(state.squares,
+                      state.pieces,
+                      state.noPushPly);
     },
     getLegalMoves() {
       return board.legalMoves(state);
