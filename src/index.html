@@ -55,25 +55,28 @@
  var kSearchTime = 200;
 
  function initAi(sokoban) {
-   var fen = sokoban.getFen();
+
    function onBestMove(move) {
      sokoban.move(move);
+     setTimeout(reset, 0);
+   }
+
+   function reset() {
+     var fen = sokoban.getFen();
      engine.stop();
-     setTimeout(() => {
-       engine.setPosition(sokoban.getFen());
-       engine.go({
-         searchDeadline: Date.now() + kSearchTime
-       });
-     }, 0);
+     engine.setPosition(fen);
+     engine.go({
+       searchDeadline: Date.now() + kSearchTime
+     });
    }
    
    var engine = new Sokoban.Engine(onBestMove, {});
 
-   engine.setPosition(fen);
+   reset();
 
-   engine.go({
-     searchDeadline: Date.now() + 2000
-   });   
+   return {
+     reset
+   };
  }
 
  Sokoban(document.getElementById('app'), opts, soko => {
