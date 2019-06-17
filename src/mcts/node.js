@@ -155,12 +155,12 @@ export function Node(parent, index) {
     return res;
   };
 
-  this.toShortString = (n, spaces = "") => {
+  this.toShortString = (x, spaces = "") => {
     var indent = "  ";
     var res = spaces + indent + `<node ${this.index} q=${roundTo(q)} n=${roundTo(n)}>`;
     for (var iEdge of this.edges().range()) {
       var edge = iEdge.value();
-      res += "\n" + spaces + indent + edge.toShortString(n, spaces + indent) + "\n";
+      res += "\n" + spaces + indent + edge.toShortString(x, spaces + indent) + "\n";
     }
     res += spaces + indent + "</node>";
     return res;
@@ -204,10 +204,10 @@ export function EdgeAndNode(edge, node) {
     return res;
   };
 
-  this.toShortString = (n, spaces) => {
+  this.toShortString = (x, spaces) => {
     var res =
         [`<${this.edge.getMove()} p=${roundTo(this.edge.getP())}>`,
-         (this.node&&n > 0)?"\n"+node.toShortString(n-1, spaces):".",
+         (this.node&&x > 0)?"\n"+node.toShortString(x-1, spaces):".",
          `</${this.edge.getMove()}>`].join("");
     return res;
   };

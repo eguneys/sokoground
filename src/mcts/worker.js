@@ -3,11 +3,12 @@ import * as sokoban from './sokoban';
 import { encodePositionForNN } from '../neural/encoder';
 import { EdgeIterator } from './node';
 import * as util from './util';
+import PositionHistory from './position';
 
 export default function SearchWorker(search, params) {
 
-  const history = search.playedHistory;
-  
+  const history = new PositionHistory(search.playedHistory);
+
   let minibatch = [],
       computation;
 
@@ -103,6 +104,7 @@ export default function SearchWorker(search, params) {
       cur = prev;
     }
 
+
     for (var i = toAdd.length - 1; i >= 0; i--) {
       history.append(toAdd[i]);
     }
@@ -110,6 +112,8 @@ export default function SearchWorker(search, params) {
     const board = history.last().getBoard(),
           legalMoves = board.getLegalMoves(),
           isEnd = board.isEnd();
+
+    console.log(board.fen);
 
     if (isEnd) {
       node.makeTerminal();

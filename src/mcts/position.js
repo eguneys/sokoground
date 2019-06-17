@@ -1,3 +1,5 @@
+import Sokoban from './sokoban';
+
 function Position(board) {
   let repetitions = 0;
 
@@ -14,8 +16,15 @@ function Position(board) {
   };
 }
 
-export default function PositionHistory() {
+export default function PositionHistory(other) {
   var positions = [];
+  if (other) {
+    positions = other.getPositions();
+  }
+
+  this.getPositions = () => {
+    return positions;
+  };
 
   this.last = () => {
     return positions.slice(-1)[0];
@@ -39,8 +48,10 @@ export default function PositionHistory() {
   };
 
   this.append = (move) => {
-    const lastBoard = this.last().getBoard().applyMove(move);
-    positions.push(new Position(this.last().getBoard()));
+    const lastBoard = new Sokoban();
+    lastBoard.setFromFen(this.last().getBoard().fen);
+    lastBoard.applyMove(move);
+    positions.push(new Position(lastBoard));
     this.last().setRepetitions(computeLastMoveRepetitions());
   };
 
