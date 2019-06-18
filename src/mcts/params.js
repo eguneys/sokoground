@@ -20,7 +20,7 @@ export default function SearchParams(options) {
 }
 
 export function populate(options) {
-  options.kCpuct = options.kCpuct || 0.3;
+  options.kCpuct = options.kCpuct || 1.4;
   options.kFpuValue = options.kFpuValue || 1.2;
   options.kNoPush = options.kNoPush || 15;
 }

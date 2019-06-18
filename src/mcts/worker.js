@@ -22,11 +22,13 @@ export default function SearchWorker(search, params) {
         depth = 0,
         nodeAlreadyUpdated = true;
 
+    const ps = [];
     while (true) {
 
       if (!nodeAlreadyUpdated) {
         node = bestEdge.getOrSpawnNode(node);
       }
+
       bestEdge.reset();
 
       depth++;
@@ -83,11 +85,11 @@ export default function SearchWorker(search, params) {
       }
 
       if (isRootNode && possibleMoves <= 1) {
+        console.log('onemoveleft', possibleMoves);
         search.onlyOnePossibleMoveLeft = true;
       }
       isRootNode = false;
     }
-    
   };
 
   const initializeIteration = (computation_) => {
@@ -129,13 +131,17 @@ export default function SearchWorker(search, params) {
 
     const toAdd = [];
 
+    const ps = [];
+
     let cur = node;
     while (cur !== search.rootNode) {
       let prev = cur.getParent();
       toAdd.push(prev.getEdgeToNode(cur).getMove());
+      ps.push(prev.toShortString(1));
       cur = prev;
     }
-
+    // console.log(toAdd);
+    // ps.map(_ => console.log(_));
 
     for (var i = toAdd.length - 1; i >= 0; i--) {
       history.append(toAdd[i]);
@@ -254,7 +260,7 @@ export default function SearchWorker(search, params) {
       }
 
       if (canConvert) {
-        p.makeTerminal(v === 1 ? 'lose' : 'win');
+        // p.makeTerminal(v === 1 ? 'lose' : 'win');
       }
 
     }

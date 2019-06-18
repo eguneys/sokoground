@@ -35,7 +35,7 @@ function RandomNetworkComputation() {
   };
 
   this.getQVal = (sample) => {
-    return ((inputs[sample] % 0xffffffff) - (0xffffffff / 2)) / 0xffffffff;
+    return ((inputs[sample] % 0xffffffff) - (0xffffffff / 2)) / (0xffffffff / 2);
   };
 
   this.getPVal = (sample, moveId) => {

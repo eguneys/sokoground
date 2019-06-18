@@ -42,6 +42,11 @@ export default function Search(tree,
 
     if (shouldStop && !bestMoveIsSent) {
       ensureBestMoveKnown();
+      if (!finalBestMove) {
+        var worker = new SearchWorker(this, params);
+        worker.Run();
+        ensureBestMoveKnown();
+      }
       bestMoveCb(finalBestMove.getMove());
       bestMoveIsSent = true;
     }
