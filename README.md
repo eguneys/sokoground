@@ -1,5 +1,7 @@
 # sokoground
 
+Sokoban AI using Monte Carlo Tree Search inspired by https://github.com/LeelaChessZero/lc0
+
 ![Classic Sokoban](https://github.com/eguneys/sokoground/blob/master/assets/soko.gif)
 
 
