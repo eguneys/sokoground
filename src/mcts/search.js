@@ -2,9 +2,7 @@ import SearchWorker from './worker';
 import { EdgeAndNode } from './node';
 import SearchParams from './params';
 
-function now() {
-  return Date.now();
-}
+import { roundTo, now } from './util';
 
 export default function Search(tree,
                                network,
@@ -68,7 +66,7 @@ export default function Search(tree,
     if (!this.rootNode.hasChildren()) return;
 
     console.log(this.playedHistory.last().getBoard().fen);
-    console.log(this.rootNode.toShortString(6, { discardLoss: 'hidden' }));
+    // console.log(this.rootNode.toShortString(6, { discardLoss: 'hidden' }));
 
     finalBestMove = getBestChildNoTemperature(this.rootNode);
   };
@@ -97,7 +95,16 @@ export default function Search(tree,
       return p;
     });
 
-    // console.log(edges.map(_ => _.n + _.value.getMove()));
+    console.log(edges.map(_ => `${_.value.getMove()} -> ${roundTo(_.n)} q:${roundTo(_.q)} p:${roundTo(_.p)}`).join("\n"));
+
+    edges.reduce((acc, edge) => {
+      if (edge.q > acc.mq) {
+        // debugger;
+        // console.log(edges);
+        return acc;
+      }
+      return { mq: edge.q };
+    }, { mq: 1 });
 
     var res = edges.map(_ => _.value);
     return res;

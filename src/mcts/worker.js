@@ -192,6 +192,10 @@ export default function SearchWorker(search, params) {
 
     nodeToProcess.v = -computation.getQVal(idxInComputation);
 
+    if (nodeToProcess.v === -1) {
+      debugger;
+    }
+
     var total = 0;
     for (var iEdge of node.edges().range()) {
       var edge = iEdge.value();
@@ -238,23 +242,19 @@ export default function SearchWorker(search, params) {
         v = n.getQ();
       }
 
-      if (n.isTerminal) {
-        // debugger;
-      }
-
       n.finalizeScoreUpdate(v);
       
-      // canConvert = canConvert && p != search.rootNode && !p.isTerminal;
+      canConvert = canConvert && p != search.rootNode && !p.isTerminal;
 
-      // if (canConvert && v != 1) {
-      //   for (var iEdge of p.edges().range()) {
-      //     var edge = iEdge.value();
-      //     canConvert = canConvert && edge.isTerminal() && edge.getQ(0) === v;
-      //   }
-      // }
+      if (canConvert && v != 1) {
+        for (var iEdge of p.edges().range()) {
+          var edge = iEdge.value();
+          canConvert = canConvert && edge.isTerminal() && edge.getQ(0) === v;
+        }
+      }
 
       if (canConvert) {
-        // p.makeTerminal(v === 1 ? 'lose' : 'win');
+        p.makeTerminal(v === 1 ? 'win' : 'lose');
       }
 
     }
@@ -292,7 +292,9 @@ function getFpu(params, node, isRootNode) {
 
 function computeCpuct(params, N) {
   const init = params.getCpuct();
-  return init;
+  const k =  params.getCpuctFactor();
+  const base = params.getCpuctBase();
+  return init + (k ? k * Math.log((N + base) / base) : 0);
 }
 
 function Visit(node, depth) {

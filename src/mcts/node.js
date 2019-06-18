@@ -124,11 +124,14 @@ export function Node(parent, index) {
   };
 
   this.finalizeScoreUpdate = (v, multivisit = 1) => {
-    if (q + multivisit * (v - q) / (n + multivisit) === 1) {
-      // debugger;
-    }
+    var preQ = q;
 
     q += multivisit * (v - q) / (n + multivisit);
+
+    if (v !== -1 && q === -1) {
+      console.log(preQ, v);
+      debugger;
+    }
 
     n += multivisit;
 
@@ -198,7 +201,25 @@ export function Node(parent, index) {
     }
     res += spaces + indent + "</node>";
     return res;
-  };  
+  };
+
+  this.toPrettyShortString = () => {
+    var edge = this.getOwnEdge();
+    var res = edge.getMove() + " -> " +
+        roundTo(n) + " q:" + roundTo(q) + " p:" + roundTo(edge.getP());
+    return res;
+  };
+
+  this.toTailString = () => {
+    var res = "";
+    var cur = this;
+    while ((cur = cur.getParent()) !== null) {
+      if (!cur.getParent()) break;
+      var edge = cur.getOwnEdge();
+      res = edge.getMove() + " -> " + roundTo(cur.getN()) + " " + res;
+    }
+    return res + this.toPrettyShortString();
+  };
 }
 
 export function EdgeAndNode(edge, node) {

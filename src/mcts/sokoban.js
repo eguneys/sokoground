@@ -27,6 +27,11 @@ export default function Sokoban() {
     }
     var s = this.piecesSquares();
     var { orig, dest, dest2 } = move.dests(s, dir);
+    var isPush = false;
+
+    if (s.pieces[dest] && s.pieces[dest].role === 'box') {
+      isPush = true;
+    }
 
     if (!board.apiMove({ ...s, events: {} }, orig, dest, dest2)) {
       throw new Error("bad move " + dirS + "\n" + this.fen);
@@ -34,6 +39,7 @@ export default function Sokoban() {
     }
     this.fen = fenWrite(s.squares, s.pieces);
     this._pieces = null;
+    return isPush;
   };
 
   this.piecesSquares = () => {
