@@ -27,8 +27,6 @@
 
     <input id="searchTime" type="range" min="100", max="1660000" value="1000"> Search Time </input>
     <br/>
-    <textarea id="fenInput" cols="20" rows="20" style="width: 300px; height: 300px"></textarea>
-    <button id="loadFen"> Load Fen </button>
   </div>
 
   <div class="hud">
@@ -88,7 +86,7 @@
    "###.   ##@      ####\n" +
    "####################\n";
 
- var testFen6 = // 3000
+ var testFen6 = // 30000
    "####################\n" +
    "#########.##########\n" +
    "#########  .$  #####\n" +
@@ -96,16 +94,24 @@
    "###.   ##@      ####\n" +
    "####################\n";
 
+ var testFen7 = // 30000
+   "####################\n" +
+   "#########.##########\n" +
+   "#########  .$  #####\n" +
+   "#########   $$  ####\n" +
+   "###.   ##@     .####\n" +
+   "####################\n";
+
  var opts = {
    // level: 1,
-   fen: testFen6,
+   fen: testFen7,
    events: {
      move() {
        renderHud(level, sokoban);
      }
    }
  };
- var kSearchTime = 20000;
+ var kSearchTime = 420000;
 
  function initAi(sokoban) {
 
@@ -160,15 +166,6 @@
    document.getElementById('searchTime').oninput = function() {
      kSearchTime = parseInt(this.value);
    };
-
-   document.getElementById('fenInput').value = sokoban.getFen();
-   onClick(document.getElementById('loadFen'), () => {
-     const fen = document.getElementById('fenInput').value;
-     sokoban.set({
-       fen
-     });
-     aiApi.stop();
-   });
  });
 
  function renderHud(level, sokoban) {

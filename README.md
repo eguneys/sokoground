@@ -4,10 +4,6 @@ Sokoban AI using Monte Carlo Tree Search inspired by https://github.com/LeelaChe
 
 ![Classic Sokoban](https://github.com/eguneys/sokoground/blob/master/assets/soko.gif)
 
-## Problems
-
-* On the first level character shouldn't go right as it leads to a lost by repetition. But it does go right for some reason.
-
 To run:
 
     yarn install
