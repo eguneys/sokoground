@@ -66,7 +66,7 @@ export default function SearchWorker(search, params) {
         const Q = child.value().getQ(fpu);
         const score = child.value().getU(puctMult) + Q;
 
-        cs.push({ Q, score, q: child.value().getQ(fpu) });
+        cs.push({ m: child.value().getMove(), Q, score, q: child.value().getQ(fpu), v: child.value().toShortString(1) });
 
         if (score > best) {
           secondBest = best;
@@ -79,13 +79,7 @@ export default function SearchWorker(search, params) {
         }
       }
 
-      if (best < -0.5) {
-        // console.log(history.last().getBoard().fen);
-        // console.log(depth, cs, best);
-      }
-
       if (isRootNode && possibleMoves <= 1) {
-        console.log('onemoveleft', possibleMoves);
         search.onlyOnePossibleMoveLeft = true;
       }
       isRootNode = false;
@@ -250,14 +244,14 @@ export default function SearchWorker(search, params) {
 
       n.finalizeScoreUpdate(v);
       
-      canConvert = canConvert && p != search.rootNode && !p.isTerminal;
+      // canConvert = canConvert && p != search.rootNode && !p.isTerminal;
 
-      if (canConvert && v != 1) {
-        for (var iEdge of p.edges().range()) {
-          var edge = iEdge.value();
-          canConvert = canConvert && edge.isTerminal() && edge.getQ(0) === v;
-        }
-      }
+      // if (canConvert && v != 1) {
+      //   for (var iEdge of p.edges().range()) {
+      //     var edge = iEdge.value();
+      //     canConvert = canConvert && edge.isTerminal() && edge.getQ(0) === v;
+      //   }
+      // }
 
       if (canConvert) {
         // p.makeTerminal(v === 1 ? 'lose' : 'win');

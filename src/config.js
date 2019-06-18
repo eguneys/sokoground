@@ -4,7 +4,7 @@ export function configure(state, config) {
 
   merge(state, config);
 
-  if (state.level) {
+  if (config.level) {
     config.fen = state.levels[state.level - 1];
   }
   if (config.fen) {

@@ -30,9 +30,10 @@ export function encodePositionForNN(history, historyPlanes) {
     result[base + 1].mask = (board.char());
     result[base + 2].mask = (board.targets());
     result[base + 3].mask = (board.walls());
+    result[base + 4].mask = (board.boxtargets());
 
     const repetitions = position.getRepetitions();
-    if (repetitions >= 1) result[base + 4].setAll();
+    if (repetitions >= 1) result[base + 5].setAll();
     // if (repetitions >= 3) result[base + 5].setAll();
   }
 

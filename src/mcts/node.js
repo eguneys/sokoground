@@ -125,7 +125,7 @@ export function Node(parent, index) {
 
   this.finalizeScoreUpdate = (v, multivisit = 1) => {
     if (q + multivisit * (v - q) / (n + multivisit) === 1) {
-      debugger;
+      // debugger;
     }
 
     q += multivisit * (v - q) / (n + multivisit);
@@ -191,7 +191,10 @@ export function Node(parent, index) {
     var res = spaces + indent + `<node ${this.index} q=${roundTo(q)} n=${roundTo(n)}>`;
     for (var iEdge of this.edges().range()) {
       var edge = iEdge.value();
-      res += "\n" + spaces + indent + edge.toShortString(x, opts, spaces + indent) + "\n";
+      var str = edge.toShortString(x, opts, spaces + indent);
+      if (str) {
+        res += "\n" + spaces + indent + str + "\n";
+      }
     }
     res += spaces + indent + "</node>";
     return res;
@@ -203,7 +206,7 @@ export function EdgeAndNode(edge, node) {
   this.node = node;
 
   this.getQ = (defaultQ) => {
-    return (this.node && this.node.getN() > 0) ? node.getQ() : defaultQ;
+    return (this.node && this.node.getN() > 0) ? this.node.getQ() : defaultQ;
   };
 
   this.getN = () => {
@@ -240,7 +243,7 @@ export function EdgeAndNode(edge, node) {
   };
 
   this.toShortString = (x, opts = {}, spaces) => {
-    if (opts.discardLoss && this.getQ(0) === -1) {
+    if (opts.discardLoss && (this.getQ(0) === -1 || !this.node)) {
       if (opts.discardLoss === 'hidden')
         return '';
       return `<${this.edge.getMove()} loss/>`;

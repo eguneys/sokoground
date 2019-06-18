@@ -88,6 +88,20 @@ export default function Sokoban() {
 
   this.walls = encodeSquare('wall');
 
+  this.boxtargets = () => {
+    let res = "";
+    const { pieces, squares } = this.piecesSquares();
+
+    for (var key of Object.keys(pieces)) {
+      var piece = pieces[key];
+      var square = squares[key];
+      if (piece.role === 'box' && square.role === 'target') {
+        res += key;
+      }
+    }
+    return stringHash(res);    
+  };
+
   this.isEnd = () => {
     return this.fen.indexOf(invRoles['box']) === -1;
   };

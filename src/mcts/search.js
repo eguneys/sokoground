@@ -42,12 +42,9 @@ export default function Search(tree,
 
     if (shouldStop && !bestMoveIsSent) {
       ensureBestMoveKnown();
-      if (!finalBestMove) {
-        var worker = new SearchWorker(this, params);
-        worker.Run();
-        ensureBestMoveKnown();
+      if (finalBestMove) {
+        bestMoveCb(finalBestMove.getMove());
       }
-      bestMoveCb(finalBestMove.getMove());
       bestMoveIsSent = true;
     }
   };
@@ -69,6 +66,9 @@ export default function Search(tree,
   const ensureBestMoveKnown = () => {
     if (bestMoveIsSent) return;
     if (!this.rootNode.hasChildren()) return;
+
+    console.log(this.playedHistory.last().getBoard().fen);
+    console.log(this.rootNode.toShortString(6, { discardLoss: 'hidden' }));
 
     finalBestMove = getBestChildNoTemperature(this.rootNode);
   };
@@ -97,7 +97,7 @@ export default function Search(tree,
       return p;
     });
 
-    console.log(edges.map(_ => _.n + _.value.getMove()));
+    // console.log(edges.map(_ => _.n + _.value.getMove()));
 
     var res = edges.map(_ => _.value);
     return res;
