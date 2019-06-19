@@ -123,7 +123,8 @@ export default function Sokoban() {
 
     for (var key of Object.keys(pieces)) {
       var piece = pieces[key];
-      if (piece.role === 'box') {
+      var square = squares[key];
+      if (piece.role === 'box' && square.role !== 'target') {
         const pos = key2pos(key),
               left = addDir(pos, move.dirLeft),
               right = addDir(pos, move.dirRight),
