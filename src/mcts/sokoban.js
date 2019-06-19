@@ -2,6 +2,7 @@ import stringHash from 'string-hash';
 import { write as fenWrite, read as fenRead } from '../fen';
 import * as board from '../board';
 import * as move from '../move';
+import { key2pos, pos2key } from '../util';
 
 const roles = { '#': 'wall', '.': 'target', ' ': 'space', '$': 'box', '*': 'boxtarget', '@': 'char' };
 
@@ -110,6 +111,41 @@ export default function Sokoban() {
 
   this.isEnd = () => {
     return this.fen.indexOf(invRoles['box']) === -1;
+  };
+
+  this.isStuck = () => {
+    function addDir(pos, dir) {
+      return [pos[0] + dir[0],
+              pos[1] + dir[1]];
+    }
+
+    const { pieces, squares } = this.piecesSquares();
+
+    for (var key of Object.keys(pieces)) {
+      var piece = pieces[key];
+      if (piece.role === 'box') {
+        const pos = key2pos(key),
+              left = addDir(pos, move.dirLeft),
+              right = addDir(pos, move.dirRight),
+              up = addDir(pos, move.dirUp),
+              down = addDir(pos, move.dirDown),
+              checks = [
+                [left, up],
+                [left, down],
+                [right, up],
+                [right, down]
+              ];
+
+        for (var check of checks) {
+          var square1 = squares[pos2key(check[0])],
+              square2 = squares[pos2key(check[1])];
+          if (square1.role === 'wall' && square2.role === 'wall') {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
   };
 
   this.getLegalMoves = () => {

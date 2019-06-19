@@ -86,7 +86,7 @@
    "###.   ##@      ####\n" +
    "####################\n";
 
- var testFen6 = // 30000
+ var testFen6 = // 4000
    "####################\n" +
    "#########.##########\n" +
    "#########  .$  #####\n" +
@@ -94,17 +94,17 @@
    "###.   ##@      ####\n" +
    "####################\n";
 
- var testFen7 = // 30000
+ var testFen7 = // 4000
    "####################\n" +
    "#########.##########\n" +
    "#########  .$  #####\n" +
    "#########   $   ####\n" +
-   "###.   ##@     .####\n" +
+   "###.   ##@      ####\n" +
    "####################\n";
 
  var opts = {
-   // level: 1,
-   fen: testFen7,
+   level: 1,
+   // fen: testFen7,
    events: {
      move() {
        renderHud(level, sokoban);
@@ -116,7 +116,7 @@
  var minutes = 60 * seconds
  var hour = 60 * minutes;
 
- var kSearchTime = 5 * seconds;
+ var kSearchTime = 10 * seconds;
 
  function initAi(sokoban) {
 
@@ -158,6 +158,7 @@
      sokoban.set({
        level: level
      });
+     aiApi.stop();
    });
 
    onClick(document.getElementById('prevLevel'), () => {

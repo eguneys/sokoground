@@ -143,10 +143,16 @@ export default function SearchWorker(search, params) {
 
     const board = history.last().getBoard(),
           legalMoves = board.getLegalMoves(),
-          isEnd = board.isEnd();
+          isEnd = board.isEnd(),
+          isStuck = board.isStuck();
 
     if (isEnd) {
       node.makeTerminal('win');
+      return;
+    }
+
+    if (isStuck) {
+      node.makeTerminal('lose');
       return;
     }
 
@@ -243,6 +249,10 @@ export default function SearchWorker(search, params) {
       }
 
       n.finalizeScoreUpdate(v);
+
+      if (!p) {
+        break;
+      }
       
       canConvert = canConvert && p != search.rootNode && !p.isTerminal;
 
