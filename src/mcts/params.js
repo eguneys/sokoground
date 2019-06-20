@@ -1,3 +1,5 @@
+import { merge } from '../util';
+
 export default function SearchParams(options) {
   
   const kCpuct = options.kCpuct,
@@ -31,17 +33,6 @@ export default function SearchParams(options) {
 
 export function populate(options) {
   merge(options, defaults());
-}
-
-function merge(base, extend) {
-  for (let key in extend) {
-    if (isObject(base[key]) && isObject(extend[key])) merge(base[key], extend[key]);
-    else base[key] = extend[key];
-  }
-}
-
-function isObject(o) {
-  return typeof o === 'object';
 }
 
 const defaults = () => ({

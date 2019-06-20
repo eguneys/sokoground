@@ -20,3 +20,5 @@ https://medium.com/@quasimik/implementing-monte-carlo-tree-search-in-node-js-5f0
 [MIT lecture on MCTS](https://www.youtube.com/watch?v=xmImNoDc9Z4)
 
 [Short explanatory video on MCTS](https://www.youtube.com/watch?v=NjeYgIbPMmg)
+
+[Tensorflow API coding train](https://www.youtube.com/watch?v=F4WWukTWoXY&list=PLRqwX-V7Uu6YIeVA3dNxbR9PYj4wV31oQ)
