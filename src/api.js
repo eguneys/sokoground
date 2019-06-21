@@ -19,6 +19,9 @@ export function start(state, redraw) {
     isEnd() {
       return board.isEnd(state);
     },
+    isStuck() {
+      return board.isStuck(state);
+    },
     move(dir) {
       render(state => {
         switch (dir) {

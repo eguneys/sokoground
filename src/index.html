@@ -124,7 +124,7 @@
  var minutes = 60 * seconds
  var hour = 60 * minutes;
 
- var kSearchTime = 0.3  * seconds;
+ var kSearchTime = 10  * seconds;
 
  function initAiPlay(sokoban) {
 
@@ -253,7 +253,9 @@
  function renderHud(level, sokoban) {
    renderLevel(level);
    renderLegals(sokoban.getLegalMoves());
-   renderIsEnd(sokoban.isEnd()?"is end": "is playing");
+   renderIsEnd(sokoban.isEnd()?"is end":
+               sokoban.isStuck()?"is stuck":
+               "is playing");
  }
 
  function renderIsEnd(str) {

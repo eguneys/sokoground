@@ -22,6 +22,7 @@ export function Engine(bestMoveCb, options) {
     if (!tree) {
       tree = new NodeTree();
     }
+
     tree.resetToPosition(fen, moves);
   };
 
