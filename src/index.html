@@ -34,8 +34,8 @@
   <div class="controls">
     <div class="self">
       <label>Level Set</label> <select id="levelSets"></select>
-      <button id="nextLevel"> Next Level </button>
       <button id="prevLevel"> Previous Level </button>
+      <button id="nextLevel"> Next Level </button>
       <button id="selfplay"> Start Self Play </button>
     </div>
 
@@ -222,7 +222,7 @@
    }));
 
    unbinds.push(onClick(document.getElementById('nextLevel'), () => {
-     level++;
+     level = level === levels.length ? 1 : level + 1;
      renderHud(level, sokoban);
      sokoban.set({
        level: level
@@ -234,7 +234,7 @@
    }));
 
    unbinds.push(onClick(document.getElementById('prevLevel'), () => {
-     level--;
+     level = level === 1 ? levels.length : level - 1;
      renderHud(level, sokoban);
      sokoban.set({
        level: level
@@ -302,6 +302,69 @@
    el.addEventListener('change', f);
  }
 
+ function addOption(el, value) {
+   const $option = document.createElement('option');
+   $option.value = value;
+   $option.innerHTML = value;
+   el.appendChild($option);
+ }
+
+ function makeStorage(name) {
+   let val;
+   return {
+     get() {
+       return val;
+     },
+     set(value) {
+       val = value;
+     }
+   }
+ }
+
+ const customLevelsStorage = makeStorage('customlevels');
+
+ function getCustomLevels() {
+   let levels = customLevelsStorage.get();
+
+   if (!levels) {
+     customLevelsStorage.set(initialCustomLevels);
+     return getCustomLevels(level);
+   }
+
+   return levels;
+ }
+
+ function setCustomLevel(level, fen) {
+   let levels = customLevelsStorage.get();
+   levels[level] = fen;
+   customLevelsStorage.set(levels);
+ }
+
+ function getSelectedLevelSet(el, levelSets) {
+   const name = el.options[el.selectedIndex].value;
+   if (name === 'Custom') {
+     return getCustomLevels();
+   } else {
+     return levelSets[name];
+   }
+ }
+
+ const customLevel = `
+####################
+####################
+########## . #######
+########## $ #######
+########## @ #######
+####################
+####################
+####################
+####################
+####################`;
+ const initialCustomLevels = [];
+ for (var i = 0; i < 10; i++) {
+   initialCustomLevels[i] = customLevel;
+ }
+
  const levelSets = ['Original', 'Test'];
 
  Promise
@@ -318,24 +381,21 @@
 
      Object
        .keys(levelSets)
-       .forEach(_ => {
-         const $option = document.createElement('option');
-         $option.value = _;
-         $option.innerHTML = _;
-         $elLevelSet.appendChild($option);
-       });
+       .forEach(_ => addOption($elLevelSet, _));
 
-     var clearSokoban = initSokoban(levelSets['Test']);
+     addOption($elLevelSet, 'Custom');
+
+     $elLevelSet.selectedIndex = $elLevelSet.options.length - 1;
+
+     var clearSokoban = initSokoban(getSelectedLevelSet($elLevelSet, levelSets));
 
      onChange($elLevelSet, (e) => {
-       const name = $elLevelSet.options[$elLevelSet.selectedIndex].value;
-       const levels = levelSets[name];
+       const levels = getSelectedLevelSet($elLevelSet, levelSets);
 
        if (clearSokoban) {
          clearSokoban();
        }
-       clearSokoban = initSokoban(levels);
-       
+         clearSokoban = initSokoban(levels);
      });
 
    });

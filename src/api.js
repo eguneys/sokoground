@@ -8,6 +8,9 @@ export function start(state, redraw) {
     set(config) {
       render(state => configure(state, config), state);
     },
+    getLevels() {
+      return state.levels;
+    },
     getFen() {
       return fenWrite(state.squares,
                       state.pieces,
