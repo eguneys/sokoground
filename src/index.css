@@ -14,7 +14,7 @@ piece, square {
   position: absolute;
   height: 5%;
   width: 5%;
-  background-size: cover;
+  background-size: 100% 100%;
 }
 
 piece {
