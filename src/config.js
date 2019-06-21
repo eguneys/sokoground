@@ -5,6 +5,9 @@ export function configure(state, config) {
   merge(state, config);
 
   if (config.level) {
+    if (!state.levels) {
+      throw new Error("Please configure levels when level is set");
+    }
     config.fen = state.levels[state.level - 1];
   }
   if (config.fen) {

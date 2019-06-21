@@ -117,10 +117,9 @@ export function write(squares, pieces, noPushPly) {
 }
 
 
-export function loadLevels(cb) {
-  fetch('./assets/Original.json')
+export function loadLevels(path) {
+  return fetch(path)
     .then(function(response) {
       return response.json();
-    })
-    .then(cb);
+    });
 }

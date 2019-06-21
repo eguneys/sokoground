@@ -9,9 +9,11 @@ import render from './render';
 
 import { loadLevels } from './fen';
 
-export function app(element, config, onLoad) {
+export function app(element, config) {
 
   const state = defaults();
+
+  configure(state, config || {});
 
   function redrawAll() {
 
@@ -31,15 +33,9 @@ export function app(element, config, onLoad) {
     state.dom.unbind = events.bindDocument(state, redrawAll);
   }
 
-  loadLevels(levels => {
-    state.levels = levels;
+  redrawAll();
 
-    configure(state, config || {});
+  const api = start(state, redrawAll);
 
-    redrawAll();
-
-    const api = start(state, redrawAll);
-
-    onLoad(api);
-  });
+  return api;
 };

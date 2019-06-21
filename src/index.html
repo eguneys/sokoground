@@ -33,6 +33,7 @@
 
   <div class="controls">
     <div class="self">
+      <label>Level Set</label> <select id="levelSets"></select>
       <button id="nextLevel"> Next Level </button>
       <button id="prevLevel"> Previous Level </button>
       <button id="selfplay"> Start Self Play </button>
@@ -51,7 +52,6 @@
 
 <script>
 
- var sokoban;
  var level = 1;
 
  var testFen2 =
@@ -110,16 +110,6 @@
    "###.   ##@      ####\n" +
    "####################\n";
 
- var opts = {
-   level: 1,
-   // fen: testFen7,
-   events: {
-     move() {
-       renderHud(level, sokoban);
-     }
-   }
- };
-
  var seconds = 1000
  var minutes = 60 * seconds
  var hour = 60 * minutes;
@@ -128,7 +118,7 @@
 
  function initAiPlay(sokoban) {
 
-   let shouldStop = false;
+   let stopLaterTimeoutId;
    let isRunning = false;
 
    let initialFen,
@@ -137,14 +127,15 @@
      sokoban.move(move);
      moves.push(move);
      setTimeout(() => {
-       if (!shouldStop) {
+       if (!stopLaterTimeoutId) {
          engine.stop();
          engine.setPosition(initialFen, moves);
          engine.go({
            searchDeadline: kSearchTime
          });
        } else {
-         shouldStop = false;
+         clearTimeout(stopLaterTimeoutId);
+         stopLaterTimeoutId = undefined;
          isRunning = false;
        }
      }, 0);
@@ -163,15 +154,17 @@
 
    return {
      isRunning() {
-       return isRunning && !shouldStop;
+       return isRunning && !stopLaterTimeoutId;
      },
      startStop() {
-       console.log('is running', isRunning);
-       if (shouldStop) {
+       console.log('is running', isRunning, stopLaterTimeoutId);
+       if (stopLaterTimeoutId) {
          
-       }
-       if (isRunning) {
-         shouldStop = true;
+       } else if (isRunning) {
+         stopLaterTimeoutId = setTimeout(() => {
+           isRunning = false;
+           stopLaterTimeoutId = undefined
+         }, 1000);
          engine.stop();
        } else {
          isRunning = true;
@@ -185,7 +178,7 @@
    var isRunning = false;
 
    var loop = new Sokoban.SelfPlayLoop({
-     searchDeadline: 10000,
+     searchDeadline: 1000,
      fen: sokoban.getFen()
    });
 
@@ -202,20 +195,33 @@
    };
  }
 
- Sokoban(document.getElementById('app'), opts, soko => {
-   sokoban = soko;
+ const initSokoban = levels => {
+   var opts = {
+     levels,
+     level: 1,
+     // fen: testFen7,
+     events: {
+       move() {
+         renderHud(level, sokoban);
+       }
+     }
+   };
+
+   var sokoban = Sokoban(document.getElementById('app'), opts);
 
    const aiApi = initAiPlay(sokoban);
    const selfPlayApi = initSelfPlay(sokoban);
 
    renderHud(level, sokoban);
 
-   onClick(document.getElementById('aiplay'), () => {
+   const unbinds = [];
+
+   unbinds.push(onClick(document.getElementById('aiplay'), () => {
      aiApi.startStop();
      renderAiPlay(aiApi.isRunning());
-   });
+   }));
 
-   onClick(document.getElementById('nextLevel'), () => {
+   unbinds.push(onClick(document.getElementById('nextLevel'), () => {
      level++;
      renderHud(level, sokoban);
      sokoban.set({
@@ -225,9 +231,9 @@
        aiApi.startStop();
        renderAiPlay(aiApi.isRunning());
      }
-   });
+   }));
 
-   onClick(document.getElementById('prevLevel'), () => {
+   unbinds.push(onClick(document.getElementById('prevLevel'), () => {
      level--;
      renderHud(level, sokoban);
      sokoban.set({
@@ -237,19 +243,26 @@
        aiApi.startStop();
        renderAiPlay(aiApi.isRunning());
      }
-   });
+   }));
 
-   onClick(document.getElementById('selfplay'), () => {
+   unbinds.push(onClick(document.getElementById('selfplay'), () => {
      selfPlayApi.start();
-   });
+   }));
 
-   document.getElementById('searchTime').oninput = function() {
+   unbinds.push(unbindable(document.getElementById('searchTime'), 'input', function() {
      kSearchTime = parseInt(this.value);
      aiApi.startStop();
      renderAiPlay(aiApi.isRunning());
-   };
- });
+   }));
 
+   return () => {
+     if (aiApi.isRunning()) {
+       aiApi.startStop();
+     }
+     unbinds.forEach(f => f());
+   }
+ }
+ 
  function renderHud(level, sokoban) {
    renderLevel(level);
    renderLegals(sokoban.getLegalMoves());
@@ -277,9 +290,55 @@
  }
 
  function onClick(el, f) {
-   el.addEventListener('click', f);
+   return unbindable(el, 'click', f);
  }
- 
+
+ function unbindable(el, eventName, callback) {
+   el.addEventListener(eventName, callback);
+   return () => el.removeEventListener(eventName, callback);
+ }
+
+ function onChange(el, f) {
+   el.addEventListener('change', f);
+ }
+
+ const levelSets = ['Original', 'Test'];
+
+ Promise
+   .all(levelSets.map(_ =>
+     Sokoban
+       .loadLevels('./assets/'+_+'.json')
+       .then(ls => ([_, ls]))
+   ))
+   .then(levelSets => {
+     levelSets = levelSets
+       .reduce((acc, _) => ({ [_[0]]: _[1], ...acc }), {});
+
+     const $elLevelSet = document.getElementById('levelSets');
+
+     Object
+       .keys(levelSets)
+       .forEach(_ => {
+         const $option = document.createElement('option');
+         $option.value = _;
+         $option.innerHTML = _;
+         $elLevelSet.appendChild($option);
+       });
+
+     var clearSokoban = initSokoban(levelSets['Test']);
+
+     onChange($elLevelSet, (e) => {
+       const name = $elLevelSet.options[$elLevelSet.selectedIndex].value;
+       const levels = levelSets[name];
+
+       if (clearSokoban) {
+         clearSokoban();
+       }
+       clearSokoban = initSokoban(levels);
+       
+     });
+
+   });
 </script>
 
 </body>

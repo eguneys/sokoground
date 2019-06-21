@@ -73,7 +73,7 @@ function SelfPlayTournament(options,
 
 SelfPlayTournament.populateOptions = (options) => {
   const defaults = () => ({
-    kTotalGames: 1
+    kTotalGames: 10
   });
 
   NetworkFactory.populateOptions(options);
