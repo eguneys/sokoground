@@ -16,6 +16,10 @@ export default function Search(tree,
 
   const params = new SearchParams(options);
 
+  let searchDeadline;
+
+  let clearWorker;
+
   let shouldStop = false,
       bestMoveIsSent = false,
       finalBestMove;
@@ -23,17 +27,17 @@ export default function Search(tree,
   this.rootNode = tree.getCurrentHead();
 
   const getTimeToDeadline = () => {
-    if (!limits.searchDeadline) return 0;
-    return limits.searchDeadline - now();
+    if (!searchDeadline) return 0;
+    return searchDeadline - now();
   };
 
   const maybeTriggerStop = () => {
     if (bestMoveIsSent) return;
     if (!shouldStop) {
-      if (this.onlyOnePossibleMoveLeft) {
-        fireStopInternal();
-      }
-      if (limits.searchDeadline && getTimeToDeadline() <= 0) {
+      // if (this.onlyOnePossibleMoveLeft) {
+      //   fireStopInternal();
+      // }
+      if (searchDeadline && getTimeToDeadline() <= 0) {
         fireStopInternal();
       }
     }
@@ -65,7 +69,7 @@ export default function Search(tree,
     if (bestMoveIsSent) return;
     if (!this.rootNode.hasChildren()) return;
 
-    console.log(this.playedHistory.last().getBoard().fen);
+    // console.log(this.playedHistory.last().getBoard().fen);
     // console.log(this.rootNode.toShortString(6, { discardLoss: 'hidden' }));
 
     finalBestMove = getBestChildNoTemperature(this.rootNode);
@@ -95,7 +99,7 @@ export default function Search(tree,
       return p;
     });
 
-    console.log(edges.map(_ => `${_.value.getMove()} -> ${roundTo(_.n)} q:${roundTo(_.q)} p:${roundTo(_.p)}`).join("\n"));
+    // console.log(edges.map(_ => `${_.value.getMove()} -> ${roundTo(_.n)} q:${roundTo(_.q)} p:${roundTo(_.p)}`).join("\n"));
 
     edges.reduce((acc, edge) => {
       if (edge.q > acc.mq) {
@@ -115,11 +119,45 @@ export default function Search(tree,
     return res[0] || new EdgeAndNode();
   };
 
+  this.getBestEval = () => {
+    const parentQ = - this.rootNode.getQ();
+    if (!this.rootNode.hasChildren()) return parentQ;
+    const bestEdge = getBestChildNoTemperature(this.rootNode);
+
+    return bestEdge.getQ(parentQ);
+  };
+
+  this.getBestMove = () => {
+    ensureBestMoveKnown();
+    return finalBestMove.getMove();
+  };
+
+  this.runAsync = () => {
+    this.start();
+    return new Promise(resolve => {
+      const step = () => {
+        if (!this.isSearchActive()) {
+          if (clearWorker)
+            clearWorker();
+
+          resolve();
+          return;
+        }
+        setTimeout(step, 100);
+      };
+      step();
+    });
+  };
+
   this.start = () => {
+    if (limits.searchDeadline) {
+      searchDeadline = now() + limits.searchDeadline;
+    }
+    
     WatchdogThread();
 
-    var worker = new SearchWorker(this, params);
-    worker.Run();
+    const worker = new SearchWorker(this, params);
+    clearWorker = worker.Run();
   };
 
   this.stop = () => {

@@ -48,8 +48,8 @@ function SelfPlayTournament(options,
           moves: game.getMoves()
         };
 
-        const trainingData = game.writeTrainingData();
-
+        // const trainingData = game.writeTrainingData();
+        
         gameCallback(gameInfo);
       }
     });
@@ -62,7 +62,7 @@ function SelfPlayTournament(options,
   const Worker = () => {
     let plays = [];
     let gameId;
-    for (; gamesCount <= kTotalGames; gamesCount++) {
+    for (; gamesCount < kTotalGames; gamesCount++) {
       gameId = gamesCount;
       plays.push(playOneGame(gameId));
     }
@@ -73,7 +73,7 @@ function SelfPlayTournament(options,
 
 SelfPlayTournament.populateOptions = (options) => {
   const defaults = () => ({
-    kTotalGames: 100
+    kTotalGames: 1
   });
 
   NetworkFactory.populateOptions(options);

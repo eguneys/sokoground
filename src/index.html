@@ -141,7 +141,7 @@
          engine.stop();
          engine.setPosition(initialFen, moves);
          engine.go({
-           searchDeadline: Date.now() + kSearchTime
+           searchDeadline: kSearchTime
          });
        } else {
          shouldStop = false;
@@ -155,7 +155,7 @@
      moves = [];
      engine.setPosition(initialFen, moves);
      engine.go({
-       searchDeadline: Date.now() + kSearchTime
+       searchDeadline: kSearchTime
      });
    }
    
@@ -185,7 +185,7 @@
    var isRunning = false;
 
    var loop = new Sokoban.SelfPlayLoop({
-     searchDeadline: 1000,
+     searchDeadline: 10000,
      fen: sokoban.getFen()
    });
 

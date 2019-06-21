@@ -1,5 +1,7 @@
 import Sokoban from './sokoban';
 
+import { GameResult } from '../selfplay/game';
+
 function Position(board, noPushPly) {
 
   this.noPushPly = noPushPly;
@@ -44,6 +46,10 @@ export default function PositionHistory(other) {
     return positions.slice(-1)[0];
   };
 
+  this.starting = () => {
+    return positions[0];
+  };
+
   this.getPositionAt = (idx) => {
     return positions[idx];
   };
@@ -64,6 +70,24 @@ export default function PositionHistory(other) {
   this.append = (move) => {
     positions.push(Position.fromParent(this.last(), move));
     this.last().setRepetitions(computeLastMoveRepetitions());
+  };
+
+  this.computeGameResult = () => {
+    const board = this.last().getBoard();
+    if (board.isEnd()) {
+      return GameResult.win;
+    }
+    if (board.isStuck()) {
+      return GameResult.lose;
+    }
+
+    if (this.last().getRepetitions() >= 1) {
+      return GameResult.lose;
+    }
+    if (this.last().getNoPush() >= 20) {
+      return GameResult.lose;
+    }
+    return GameResult.undecided;
   };
 
   const computeLastMoveRepetitions = () => {

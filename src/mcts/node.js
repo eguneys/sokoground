@@ -14,8 +14,32 @@ export function NodeTree() {
   };
 
 
-  const makeMove = (move) => {
+  this.makeMove = (move) => {
+    let newHead = null;
+
+    for (var iEdge of currentHead.edges().range()) {
+      var n = iEdge.value();
+      if (n.getMove() === move) {
+        newHead = iEdge.getOrSpawnNode(currentHead);
+
+        // if (newHead.isTerminal) newHead.makeNotTerminal();
+        break;
+      }
+    }
+
+    currentHead = newHead ? newHead : currentHead.createSingleChildNode(move);
+
     history.append(move);
+  };
+
+  this.getGameBeginNode = () => {
+    return gameBeginNode;
+  };
+
+  this.trimTreeAtHead = () => {
+    const tmp = currentHead.sibling;
+    currentHead = new Node(currentHead.getParent(), currentHead.index);
+    currentHead.sibling = tmp;
   };
   
   this.resetToPosition = (fen, moves) => {
@@ -23,7 +47,7 @@ export function NodeTree() {
 
     const { noPushPly } = startingBoard.setFromFen(fen);
 
-    if (gameBeginNode) {
+    if (gameBeginNode && history.starting().getBoard().fen !== startingBoard.fen) {
       deallocateTree();
     }
 
@@ -36,7 +60,7 @@ export function NodeTree() {
     currentHead = gameBeginNode;
 
     for (const move of moves) {
-      makeMove(move);
+      this.makeMove(move);
     }
 
   };
@@ -99,6 +123,12 @@ export function Node(parent, index) {
   this.index = index;
 
   this.isTerminal = false;
+
+  this.createSingleChildNode = (move) => {
+    edges = [move].map(_ => new Edge(_));
+    child = new Node(this, 0);
+    return child;
+  };
 
   this.createEdges = (moves) => {
     edges = moves.map(_ => new Edge(_));
@@ -204,6 +234,9 @@ export function Node(parent, index) {
   };
 
   this.toPrettyShortString = () => {
+    if (!this.getParent()) {
+      return 'root ' + roundTo(n) + "q:" + roundTo(q);
+    }
     var edge = this.getOwnEdge();
     var res = edge.getMove() + " -> " +
         roundTo(n) + " q:" + roundTo(q) + " p:" + roundTo(edge.getP());

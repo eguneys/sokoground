@@ -123,6 +123,9 @@ export default function SearchWorker(search, params) {
   const extendNode = (node) => {
     history.trim(search.playedHistory.getLength());
 
+    // console.log(search.playedHistory.last().getBoard().fen,
+    //             history.last().getBoard().fen);
+
     const toAdd = [];
 
     const ps = [];
@@ -134,12 +137,24 @@ export default function SearchWorker(search, params) {
       ps.push(prev.toShortString(1));
       cur = prev;
     }
-    // console.log(toAdd);
+    // console.log(history.last().getBoard().fen, toAdd);
     // ps.map(_ => console.log(_));
 
-    for (var i = toAdd.length - 1; i >= 0; i--) {
+    var i;
+
+
+    for (i = toAdd.length - 1; i >= 0; i--) {
       history.append(toAdd[i]);
     }
+
+    // catch(e) {
+    //   console.log(search.rootNode.toTailString());
+    //   console.log(search.playedHistory.last().getBoard().fen);
+    //   console.log('at index: ' + i);
+    //   console.log(history.last().getBoard().fen, toAdd);
+    //   console.log(node.toTailString());
+    //   throw e;
+    // }
 
     const board = history.last().getBoard(),
           legalMoves = board.getLegalMoves(),
@@ -284,13 +299,19 @@ export default function SearchWorker(search, params) {
   };
 
   this.Run = () => {
+    var timeoutId;
     function step() {
       executeOneIteration();
       if (search.isSearchActive()) {
-        setTimeout(step, 0);
+        timeoutId = setTimeout(step, 0);
       }
     }
     step();
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
   };
   
 }
