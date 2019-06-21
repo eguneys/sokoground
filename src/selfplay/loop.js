@@ -4,10 +4,12 @@ export function SelfPlayLoop(options) {
 
   SelfPlayTournament.populateOptions(options);
 
-  const tournament = new SelfPlayTournament(options, 
-                                            sendGameInfo);
 
-  tournament.Run();
+  this.run = () => {
+    const tournament = new SelfPlayTournament(options, 
+                                              sendGameInfo);
+    return tournament.Run();
+  };
 
   const sendGameInfo = (gameInfo) => {
     console.log(gameInfo);

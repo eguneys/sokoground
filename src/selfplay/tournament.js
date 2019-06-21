@@ -1,6 +1,6 @@
 import { merge } from '../util';
 
-import { populate as searchParamsPopulate } from './params';
+import { populate as searchParamsPopulate } from '../mcts/params';
 
 import NetworkFactory from '../neural/factory';
 
@@ -9,6 +9,18 @@ import { GameResult } from './game';
 
 function SelfPlayTournament(options, 
                             gameInfoCb) {
+
+  const searchLimits = {
+    searchDeadline: options.searchDeadline
+  };
+
+  if (!searchLimits.searchDeadline) {
+    throw new Error("Please configure searchDeadline option.");
+  }
+
+  if (!options.fen) {
+    throw new Error("Please configure fen option.");
+  }
 
   const gameCallback = gameInfoCb;
   let kTotalGames = options.kTotalGames;
@@ -44,7 +56,7 @@ function SelfPlayTournament(options,
   };
 
   this.Run = () => {
-    Worker();
+    return Worker();
   };
 
   const Worker = () => {

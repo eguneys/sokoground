@@ -35,12 +35,13 @@
     <div class="self">
       <button id="nextLevel"> Next Level </button>
       <button id="prevLevel"> Previous Level </button>
-      <button id="selfplay"> Start Self Training </button>
+      <button id="selfplay"> Start Self Play </button>
     </div>
 
     <div class="ai">
       <button id="aiplay"> Start AI Play </button>
-      <input id="searchTime" type="range" min="100", max="1660000" step="100" value="1000"> Search Time </input>
+      <label>Search Time</label>
+      <input id="searchTime" type="range" min="100", max="60000" step="100" value="1000"></input>
     </div>
     <br/>
   </div>
@@ -130,8 +131,8 @@
    let shouldStop = false;
    let isRunning = false;
 
-   const initialFen = sokoban.getFen();
-   let moves = [];
+   let initialFen,
+       moves;
    function onBestMove(move) {
      sokoban.move(move);
      moves.push(move);
@@ -150,6 +151,7 @@
    }
 
    function reset() {
+     initialFen = sokoban.getFen();
      moves = [];
      engine.setPosition(initialFen, moves);
      engine.go({
@@ -160,10 +162,10 @@
    var engine = new Sokoban.Engine(onBestMove, {});
 
    return {
-     isRunning: () => {
+     isRunning() {
        return isRunning && !shouldStop;
      },
-     startStop: () => {
+     startStop() {
        console.log('is running', isRunning);
        if (shouldStop) {
          
@@ -179,10 +181,32 @@
    }
  }
 
+ function initSelfPlay(sokoban) {
+   var isRunning = false;
+
+   var loop = new Sokoban.SelfPlayLoop({
+     searchDeadline: 1000,
+     fen: sokoban.getFen()
+   });
+
+   return {
+     isRunning() {
+       return isRunning;
+     },
+     start() {
+       if (!isRunning) {
+         isRunning = true;
+         loop.run();         
+       }
+     }
+   };
+ }
+
  Sokoban(document.getElementById('app'), opts, soko => {
    sokoban = soko;
 
    const aiApi = initAiPlay(sokoban);
+   const selfPlayApi = initSelfPlay(sokoban);
 
    renderHud(level, sokoban);
 
@@ -197,7 +221,10 @@
      sokoban.set({
        level: level
      });
-     aiApi.stop();
+     if (aiApi.isRunning()) {
+       aiApi.startStop();
+       renderAiPlay(aiApi.isRunning());
+     }
    });
 
    onClick(document.getElementById('prevLevel'), () => {
@@ -206,10 +233,20 @@
      sokoban.set({
        level: level
      });
+     if (aiApi.isRunning()) {
+       aiApi.startStop();
+       renderAiPlay(aiApi.isRunning());
+     }
+   });
+
+   onClick(document.getElementById('selfplay'), () => {
+     selfPlayApi.start();
    });
 
    document.getElementById('searchTime').oninput = function() {
      kSearchTime = parseInt(this.value);
+     aiApi.startStop();
+     renderAiPlay(aiApi.isRunning());
    };
  });
 

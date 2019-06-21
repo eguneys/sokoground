@@ -1,6 +1,6 @@
 import Search from '../mcts/search';
 
-import { NodeTree } from './node';
+import { NodeTree } from '../mcts/node';
 
 export default function SelfPlayGame(options) {
 
@@ -10,7 +10,7 @@ export default function SelfPlayGame(options) {
   let tree = new NodeTree(),
       search;
 
-  tree.resetToPosition(options.fen);
+  tree.resetToPosition(options.fen, []);
 
 
   this.play = () => {
@@ -36,11 +36,9 @@ export default function SelfPlayGame(options) {
                             bestQ
                           ));
 
-        const eval = bestEval;
-
-        if (eval < -0.95) {
+        if (bestEval < -0.95) {
           gameResult = GameResult.lose;
-        } else if (eval === 1) {
+        } else if (bestEval === 1) {
           gameResult = GameResult.win;
         }
 
@@ -52,6 +50,7 @@ export default function SelfPlayGame(options) {
       });
     }
 
+    return step();
   };
 }
 
