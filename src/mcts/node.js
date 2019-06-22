@@ -1,6 +1,11 @@
 import Sokoban from './sokoban';
 import PositionHistory from './position';
 
+import { encodePositionForNN } from '../neural/encoder';
+import V4TrainingData from '../neural/writer';
+
+import { GameResult } from '../selfplay/game';
+
 import { roundTo } from './util';
 
 export function NodeTree() {
@@ -207,6 +212,40 @@ export function Node(parent, index) {
 
   this.getOwnEdge = () => {
     return this.getParent().getEdgeToNode(this);
+  };
+
+  this.getV4TrainingData = (gameResult, history, bestQ) => {
+
+    const result = new V4TrainingData();
+
+    const totalN = this.getChildrenVisits();
+
+    for (var iEdge of this.edges().range()) {
+      var child = iEdge.value();
+      result.probabilities[child.edge.getMove()] = child.getN() / totalN;
+    }
+
+    const planes = encodePositionForNN(history, 8);
+    let planeIdx = 0;
+    for (var i in result.planes) {
+      result.planes[i] = planes[planeIdx++].mask;
+    }
+
+    const position = history.last();
+
+    result.noPushPlay = position.getNoPush();
+    if (gameResult === GameResult.win) {
+      result.result = 1;
+    } else if (gameResult === GameResult.lose) {
+      result.result = -1;
+    } else {
+      result.result = 0;
+    }
+
+    result.rootQ = -this.getQ();
+    result.bestQ = bestQ;
+
+    return result;
   };
 
   this.toString = () => {

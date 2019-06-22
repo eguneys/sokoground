@@ -84,7 +84,7 @@
     <div class="ai">
       <button id="aiplay"> Start AI Play </button>
       <label>Search Time</label>
-      <input id="searchTime" type="range" min="100", max="60000" step="100" value="1000"></input>
+      <input id="searchTime" type="range" min="100", max="10000" step="100" value="1000"></input>
     </div>
     <br/>
   </div>
@@ -192,9 +192,7 @@
      engine.go({ searchDeadline: kSearchTime });
    }
    
-   var engine = new Sokoban.Engine(onBestMove, onEnd, {
-     kTemperature: 0
-   });
+   var engine = new Sokoban.Engine(onBestMove, onEnd, {});
 
    return {
      isRunning() {

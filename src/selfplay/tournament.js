@@ -50,7 +50,7 @@ function SelfPlayTournament(options,
           moves: game.getMoves()
         };
 
-        // const trainingData = game.writeTrainingData();
+        const trainingData = game.writeTrainingData();
         
         gameCallback(gameInfo);
       }

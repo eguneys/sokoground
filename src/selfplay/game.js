@@ -5,7 +5,7 @@ import { NodeTree } from '../mcts/node';
 export default function SelfPlayGame(options) {
 
   let gameResult = GameResult.undecided,
-      trainingData;
+      trainingData = [];
 
   let tree = new NodeTree(),
       search;
@@ -51,12 +51,13 @@ export default function SelfPlayGame(options) {
         search.runAsync().then(() => {
           const bestEval = search.getBestEval();
           const bestQ = bestEval;
-          // trainingData.push(tree.getCurrentHead()
-          //                   .getV4TrainingData(
-          //                     GameResult.undecided,
-          //                     tree.getPositionHistory(),
-          //                     bestQ
-          //                   ));
+          
+          trainingData.push(tree.getCurrentHead()
+                            .getV4TrainingData(
+                              GameResult.undecided,
+                              tree.getPositionHistory(),
+                              bestQ
+                            ));
 
           if (bestEval < -0.95) {
             gameResult = GameResult.lose;
@@ -73,6 +74,20 @@ export default function SelfPlayGame(options) {
     }
 
     return step();
+  };
+
+  this.writeTrainingData = (writer) => {
+    console.log(trainingData);
+    for (var chunk of trainingData) {
+      if (gameResult === GameResult.win) {
+        chunk.result = 1;
+      } else if (gameResult === GameResult.lose) {
+        chunk.result = -1;
+      } else {
+        chunk.result = 0;
+      }
+      writer.writeChunk(chunk);
+    }
   };
 }
 
