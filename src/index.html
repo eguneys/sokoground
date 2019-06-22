@@ -68,6 +68,9 @@
       <span> Legal moves </span>
       <span id="legals">?</span>
     </p>
+    <p>
+      <span> Self Play Progress </span><span id="selfProgress">?</span>
+    </p>
   </div>
 
   <div class="controls">
@@ -169,9 +172,7 @@
        if (!stopLaterTimeoutId) {
          engine.stop();
          engine.setPosition(initialFen, moves);
-         engine.go({
-           searchDeadline: kSearchTime
-         });
+         engine.go({ searchDeadline: kSearchTime });
        } else {
          clearTimeout(stopLaterTimeoutId);
          stopLaterTimeoutId = undefined;
@@ -180,16 +181,20 @@
      }, 0);
    }
 
+   function onEnd() {
+     renderIsEnd('is stuck');
+   }
+
    function reset() {
      initialFen = sokoban.getFen();
      moves = [];
      engine.setPosition(initialFen, moves);
-     engine.go({
-       searchDeadline: kSearchTime
-     });
+     engine.go({ searchDeadline: kSearchTime });
    }
    
-   var engine = new Sokoban.Engine(onBestMove, {});
+   var engine = new Sokoban.Engine(onBestMove, onEnd, {
+     kTemperature: 0
+   });
 
    return {
      isRunning() {
@@ -216,10 +221,15 @@
  function initSelfPlay(sokoban) {
    var isRunning = false;
 
+   function onProgress(progress) {
+     renderSelfPlay(progress);
+   }
+
    var loop = new Sokoban.SelfPlayLoop({
-     searchDeadline: 1000,
+     searchDeadline: 20000,
+     kTemperature: 1,
      fen: sokoban.getFen()
-   });
+   }, onProgress);
 
    return {
      isRunning() {
@@ -262,10 +272,11 @@
 
    unbinds.push(onClick(document.getElementById('nextLevel'), () => {
      level = level === levels.length ? 1 : level + 1;
-     renderHud(level, sokoban);
+
      sokoban.set({
        level: level
      });
+     renderHud(level, sokoban);
      if (aiApi.isRunning()) {
        aiApi.startStop();
        renderAiPlay(aiApi.isRunning());
@@ -274,10 +285,10 @@
 
    unbinds.push(onClick(document.getElementById('prevLevel'), () => {
      level = level === 1 ? levels.length : level - 1;
-     renderHud(level, sokoban);
      sokoban.set({
        level: level
      });
+     renderHud(level, sokoban);
      if (aiApi.isRunning()) {
        aiApi.startStop();
        renderAiPlay(aiApi.isRunning());
@@ -291,6 +302,12 @@
    unbinds.push(unbindable(document.getElementById('searchTime'), 'input', function() {
      kSearchTime = parseInt(this.value);
      aiApi.startStop();
+     if (!aiApi.isRunning()) {
+       setTimeout(() => {
+         aiApi.startStop();
+         renderAiPlay(aiApi.isRunning());
+       }, 1000);
+     }
      renderAiPlay(aiApi.isRunning());
    }));
 
@@ -345,6 +362,12 @@
 
    document.getElementById('aiplay').innerHTML = status + ' AI Play';
  }
+
+ function renderSelfPlay(progress) {
+   progress = progress.n + '/' + progress.t + ' games played';
+   document.getElementById('selfProgress').innerHTML = progress;
+ }
+
 
  function onClick(el, f) {
    return unbindable(el, 'click', f);

@@ -1,4 +1,4 @@
-import { merge } from '../util';
+import { merge2 } from '../util';
 
 import { populate as searchParamsPopulate } from '../mcts/params';
 
@@ -36,6 +36,8 @@ function SelfPlayTournament(options,
     options.bestMoveCb = (move) => {
       
     };
+
+    options.endMoveCb = () => {};
 
     var game = new SelfPlayGame(options);
     games.push(game);
@@ -79,7 +81,7 @@ SelfPlayTournament.populateOptions = (options) => {
   NetworkFactory.populateOptions(options);
   searchParamsPopulate(options);
 
-  merge(options, defaults());
+  merge2(options, defaults());
 };
 
 export default SelfPlayTournament;

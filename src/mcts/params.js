@@ -1,14 +1,30 @@
-import { merge } from '../util';
+import { merge2 } from '../util';
 
 export default function SearchParams(options) {
   
-  const kCpuct = options.kCpuct,
+  const kTemperature = options.kTemperature,
+        kTemperatureVisitOffset = options.kTemperatureVisitOffset,
+        kTemperatureWinpctCutoff = options.kTemperatureWinpctCutoff,
+        kCpuct = options.kCpuct,
         kCpuctFactor = options.kCpuctFactor,
         kCpuctBase = options.kCpuctBase,
         kFpuValue = options.kFpuValue,
         kFpuValueAtRoot = kFpuValue;
 
   const kNoPush = options.kNoPush;
+
+  this.getTemperature = () => {
+    return kTemperature;
+  };
+
+  this.getTemperatureVisitOffset = () => {
+    return kTemperatureVisitOffset;
+  };
+
+  this.getTemperatureWinpctCutoff = () => {
+    return kTemperatureWinpctCutoff;
+  };
+
 
   this.getCpuctFactor = () => {
     return kCpuctFactor;
@@ -32,7 +48,7 @@ export default function SearchParams(options) {
 }
 
 export function populate(options) {
-  merge(options, defaults());
+  merge2(options, defaults());
 }
 
 const defaults = () => ({
@@ -40,5 +56,8 @@ const defaults = () => ({
   kCpuctBase: 19652,
   kCpuctFactor: 2.0,
   kFpuValue: 2,
-  kNoPush: 20
+  kNoPush: 30,
+  kTemperatureVisitOffset: 0,
+  kTemperatureWinpctCutoff: 10,
+  kTemperature: 0 // 0 100
 });

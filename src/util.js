@@ -36,7 +36,18 @@ export function merge(base, extend) {
     if (isObject(base[key]) && isObject(extend[key])) merge(base[key], extend[key]);
     else base[key] = extend[key];
   }
+  return base;
 }
+
+export function merge2(base, extend) {
+  for (let key in extend) {
+    if (isObject(base[key]) && isObject(extend[key])) merge(base[key], extend[key]);
+    else if (!base[key]) 
+      base[key] = extend[key];
+  }
+  return base;
+}
+
 
 function isObject(o) {
   return typeof o === 'object';

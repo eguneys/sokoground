@@ -4,9 +4,12 @@ import SearchParams from './params';
 
 import { roundTo, now } from './util';
 
+import { getFpu } from './worker';
+
 export default function Search(tree,
                                network,
                                bestMoveCb,
+                               endCb,
                                limits,
                                options) {
 
@@ -46,6 +49,8 @@ export default function Search(tree,
       ensureBestMoveKnown();
       if (finalBestMove) {
         bestMoveCb(finalBestMove.getMove());
+      } else {
+        endCb();
       }
       bestMoveIsSent = true;
     }
@@ -72,7 +77,11 @@ export default function Search(tree,
     // console.log(this.playedHistory.last().getBoard().fen);
     // console.log(this.rootNode.toShortString(6, { discardLoss: 'hidden' }));
 
-    finalBestMove = getBestChildNoTemperature(this.rootNode);
+    const temperature = params.getTemperature();
+
+    finalBestMove = temperature ?
+      getBestChildWithTemperature(this.rootNode, temperature) :
+      getBestChildNoTemperature(this.rootNode);
   };
 
   const getBestChildrenNoTemperature = (parent, count) => {
@@ -117,6 +126,48 @@ export default function Search(tree,
   const getBestChildNoTemperature = (parent) => {
     const res = getBestChildrenNoTemperature(parent, 1);
     return res[0] || new EdgeAndNode();
+  };
+
+  const getBestChildWithTemperature = (parent, temperature) => {
+
+    const cumulativeSums = [];
+    let sum = 0;
+    let maxN = 0;
+    const offset = params.getTemperatureVisitOffset();
+    let maxEval = -1;
+    
+    const fpu = getFpu(params, parent, parent === this.rootNode);
+
+    for (var iEdge of parent.edges().range()) {
+      var edge = iEdge.value();
+
+      if (edge.getN() + offset > maxN) {
+        maxN = edge.getN() + offset;
+        maxEval = edge.getQ(fpu);
+      }
+    }
+
+    if (maxN <= 0) return getBestChildNoTemperature(parent);
+
+    const minEval = maxEval - params.getTemperatureWinpctCutoff() / 50;
+    for (iEdge of parent.edges().range()) {
+      edge = iEdge.value();
+      if (edge.getQ(fpu) < minEval) continue;
+      sum += Math.pow(Math.max(0, (edge.getN() + offset) / maxN),
+                      1 / temperature);
+      cumulativeSums.push(sum);
+    }
+    const toss = Math.random() * cumulativeSums.slice(-1)[0];
+    const lowerBound = cumulativeSums.find(_ => _ > toss);
+    let idx = lowerBound ? cumulativeSums.indexOf(lowerBound) : cumulativeSums.length;
+
+    for (iEdge of parent.edges().range()) {
+      edge = iEdge.value();
+      if (edge.getQ(fpu) < minEval) continue;
+      if (idx-- === 0) return edge;
+    }
+    throw new Error("get best child with no temperature failed");
+    return null;
   };
 
   this.getBestEval = () => {

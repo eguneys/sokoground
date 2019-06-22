@@ -316,12 +316,12 @@ export default function SearchWorker(search, params) {
   
 }
 
-function getFpu(params, node, isRootNode) {
+export function getFpu(params, node, isRootNode) {
   const value = params.getFpuValue(isRootNode);
   return value;
 }
 
-function computeCpuct(params, N) {
+export function computeCpuct(params, N) {
   const init = params.getCpuct();
   const k =  params.getCpuctFactor();
   const base = params.getCpuctBase();

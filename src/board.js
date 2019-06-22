@@ -51,6 +51,60 @@ export function isStuck(s) {
       }
     }
   }
+
+  for (key of Object.keys(pieces)) {
+    piece = pieces[key];
+    square = squares[key];
+    if (piece.role === 'box' && square.role !== 'target') {
+      const pos = key2pos(key),
+            left = addDir(pos, move.dirLeft),
+            right = addDir(pos, move.dirRight),
+            up = addDir(pos, move.dirUp),
+            down = addDir(pos, move.dirDown);
+      const checks = [
+        [left,
+         addDir(left, move.dirUp),
+         addDir(pos, move.dirUp)],
+        [left,
+         addDir(left, move.dirDown),
+         addDir(pos, move.dirDown)],
+        [right,
+         addDir(right, move.dirUp),
+         addDir(pos, move.dirUp)],
+        [right,
+         addDir(right, move.dirDown),
+         addDir(pos, move.dirDown)],
+        [up,
+         addDir(up, move.dirLeft),
+         addDir(pos, move.dirLeft)],
+        [up,
+         addDir(up, move.dirRight),
+         addDir(pos, move.dirRight)],
+        [down,
+         addDir(down, move.dirLeft),
+         addDir(pos, move.dirLeft)],
+        [down,
+         addDir(down, move.dirRight),
+         addDir(pos, move.dirRight)]
+      ];
+
+      for (check of checks) {
+        var piece2 = pieces[pos2key(check[0])];
+        if (piece2 && piece2.role === 'box') {
+          const allWall = [check[1], check[2]].every(check => {
+            var square = squares[pos2key(check)]; 
+            return square.role === 'wall';
+          });
+          if (allWall) {
+            return true;
+          }
+        }
+      }
+      
+    }
+
+  }
+
   return false;
 }
 

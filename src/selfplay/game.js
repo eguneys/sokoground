@@ -43,6 +43,7 @@ export default function SelfPlayGame(options) {
       search = new Search(tree,
                           options.network,
                           options.bestMoveCb,
+                          options.endMoveCb,
                           options.searchLimits,
                           options);
 

@@ -4,7 +4,7 @@ import { populate as searchParamsPopulate } from './params';
 
 import NetworkFactory from '../neural/factory';
 
-export function Engine(bestMoveCb, options) {
+export function Engine(bestMoveCb, endCb, options) {
   var currentPosition,
       tree,
       network,
@@ -29,6 +29,10 @@ export function Engine(bestMoveCb, options) {
   this.setPosition = (fen, moves = []) => {
     currentPosition = { fen, moves };
   };
+
+  this.getRepetitions = () => {
+    return tree.getPositionHistory().last().getRepetitions();
+  };
   
   this.go = (params) => {
 
@@ -41,6 +45,7 @@ export function Engine(bestMoveCb, options) {
     search = new Search(tree,
                         network,
                         bestMoveCb,
+                        endCb,
                         limits,
                         options);
 
