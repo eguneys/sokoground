@@ -52,3 +52,14 @@ export function merge2(base, extend) {
 function isObject(o) {
   return typeof o === 'object';
 }
+
+export function makeStorage(name) {
+  return {
+    get() {
+      window.localStorage.getItem(name);
+    },
+    set(value) {
+      window.localStorage.setItem(name, value);
+    }
+  };
+}

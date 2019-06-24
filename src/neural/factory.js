@@ -1,3 +1,5 @@
+import * as tf from '@tensorflow/tfjs';
+
 function NetworkFactory() {
 
   var factories = [];
@@ -31,14 +33,19 @@ const Get = (() => {
 
 const LoadNetwork = (options) => {
   const backend = options['kBackend'];
-  const weights = null;
-
+  const weights = options['weights'];
+  
+  if (!weights) {
+    throw new Error("Please configure weights option");
+  }
+  
   return Get().Create(backend, weights);
 };
 
 function populateOptions(options) {
   const backends = Get().getBackendsList();
-  options['kBackend'] = backends[0];
+  if (!options['kBackend'])
+    options['kBackend'] = backends[0];
 }
 
 export default {

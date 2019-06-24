@@ -1,4 +1,5 @@
 import Sokoban from './sokoban';
+import { moveAsNNIndex } from './sokoban';
 import PositionHistory from './position';
 
 import { encodePositionForNN } from '../neural/encoder';
@@ -217,12 +218,11 @@ export function Node(parent, index) {
   this.getV4TrainingData = (gameResult, history, bestQ) => {
 
     const result = new V4TrainingData();
-
     const totalN = this.getChildrenVisits();
 
     for (var iEdge of this.edges().range()) {
       var child = iEdge.value();
-      result.probabilities[child.edge.getMove()] = child.getN() / totalN;
+      result.probabilities[moveAsNNIndex(child.edge.getMove())] = child.getN() / totalN;
     }
 
     const planes = encodePositionForNN(history, 8);

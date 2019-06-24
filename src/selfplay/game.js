@@ -77,7 +77,6 @@ export default function SelfPlayGame(options) {
   };
 
   this.writeTrainingData = (writer) => {
-    console.log(trainingData);
     for (var chunk of trainingData) {
       if (gameResult === GameResult.win) {
         chunk.result = 1;

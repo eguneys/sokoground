@@ -21,6 +21,7 @@ export function encodePositionForNN(history, historyPlanes) {
   for (var i = 0; i < Math.min(historyPlanes, kMoveHistory);
        ++i, --historyIdx) {
     const position = history.getPositionAt(historyIdx < 0 ? 0 : historyIdx);
+    const board = position.getBoard();
 
     if (historyIdx < 0)
       break;
@@ -31,7 +32,6 @@ export function encodePositionForNN(history, historyPlanes) {
     result[base + 2].mask = (board.targets());
     result[base + 3].mask = (board.walls());
     result[base + 4].mask = (board.boxtargets());
-
     const repetitions = position.getRepetitions();
     if (repetitions >= 1) result[base + 5].setAll();
     // if (repetitions >= 3) result[base + 5].setAll();

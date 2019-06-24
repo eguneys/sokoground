@@ -12,8 +12,10 @@ export function Engine(bestMoveCb, endCb, options) {
 
   populateOptions(options);
 
+  network = NetworkFactory.LoadNetwork(options);
+
   const updateFromUciOptions = () => {
-    network = NetworkFactory.LoadNetwork(options);
+    // network = NetworkFactory.LoadNetwork(options);
   };
 
   const setupPosition = (fen, moves) => {

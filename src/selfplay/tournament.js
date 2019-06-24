@@ -4,6 +4,8 @@ import { populate as searchParamsPopulate } from '../mcts/params';
 
 import NetworkFactory from '../neural/factory';
 
+import { TrainingDataWriter } from '../neural/writer';
+
 import SelfPlayGame from './game';
 import { GameResult } from './game';
 
@@ -50,8 +52,11 @@ function SelfPlayTournament(options,
           moves: game.getMoves()
         };
 
-        const trainingData = game.writeTrainingData();
-        
+        const writer = new TrainingDataWriter();
+        const trainingData = game.writeTrainingData(writer);
+
+        writer.finalize();
+
         gameCallback(gameInfo);
       }
     });
@@ -75,7 +80,7 @@ function SelfPlayTournament(options,
 
 SelfPlayTournament.populateOptions = (options) => {
   const defaults = () => ({
-    kTotalGames: 10
+    kTotalGames: 1
   });
 
   NetworkFactory.populateOptions(options);

@@ -28,3 +28,5 @@ https://medium.com/@quasimik/implementing-monte-carlo-tree-search-in-node-js-5f0
 [Short explanatory video on MCTS](https://www.youtube.com/watch?v=NjeYgIbPMmg)
 
 [Tensorflow API coding train](https://www.youtube.com/watch?v=F4WWukTWoXY&list=PLRqwX-V7Uu6YIeVA3dNxbR9PYj4wV31oQ)
+
+[input shape question](https://stackoverflow.com/questions/44747343/keras-input-explanation-input-shape-units-batch-size-dim-etc)

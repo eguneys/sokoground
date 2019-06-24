@@ -16,6 +16,10 @@
          flex-flow: column nowrap;
      }
 
+     .controls-wrap {
+         display: flex;
+     }
+
      .app-wrap {
          margin: auto;
          width: 90%;
@@ -62,33 +66,33 @@
     </div>
   </div>
 
-  <div class="hud">
-    <p> <span> Level </span> <span id="level">?</span>
-      <span> Status </span> <span id="isend"> ? </span> 
-      <span> Legal moves </span>
-      <span id="legals">?</span>
-    </p>
-    <p>
-      <span> Self Play Progress </span><span id="selfProgress">?</span>
-    </p>
-  </div>
-
-  <div class="controls">
-    <div class="self">
-      <label>Level Set</label> <select id="levelSets"></select>
-      <button id="prevLevel"> Previous Level </button>
-      <button id="nextLevel"> Next Level </button>
-      <button id="selfplay"> Start Self Play </button>
+  <div class="controls-wrap">
+    <div class="hud">
+      <p> <span> Level </span> <span id="level">?</span>
+        <span> Status </span> <span id="isend"> ? </span> 
+        <span> Legal moves </span>
+        <span id="legals">?</span>
+      </p>
+      <p>
+        <span> Self Play Progress </span><span id="selfProgress">?</span>
+      </p>
     </div>
 
-    <div class="ai">
-      <button id="aiplay"> Start AI Play </button>
-      <label>Search Time</label>
-      <input id="searchTime" type="range" min="100", max="10000" step="100" value="1000"></input>
+    <div class="controls">
+      <div class="ai">
+        <button id="aiplay"> Start AI Play </button>
+        <label>Search Time</label>
+        <input id="searchTime" type="range" min="100", max="10000" step="100" value="1000"></input>
+      </div>
+      <br/>
+      <div class="self">
+        <label>Level Set</label> <select id="levelSets"></select>
+        <button id="prevLevel"> Previous Level </button>
+        <button id="nextLevel"> Next Level </button>
+        <button id="selfplay"> Start Self Play </button>
+      </div>
     </div>
-    <br/>
   </div>
-
 
 </section>
 
@@ -158,7 +162,7 @@
 
  var kSearchTime = 10  * seconds;
 
- function initAiPlay(sokoban) {
+ function initAiPlay(sokoban, weights) {
 
    let stopLaterTimeoutId;
    let isRunning = false;
@@ -192,7 +196,10 @@
      engine.go({ searchDeadline: kSearchTime });
    }
    
-   var engine = new Sokoban.Engine(onBestMove, onEnd, {});
+   var engine = new Sokoban.Engine(onBestMove, onEnd, {
+     weights,
+     kBackend: 'tensorflowSimple'
+   });
 
    return {
      isRunning() {
@@ -216,7 +223,7 @@
    }
  }
 
- function initSelfPlay(sokoban) {
+ function initSelfPlay(sokoban, weights) {
    var isRunning = false;
 
    function onProgress(progress) {
@@ -224,7 +231,9 @@
    }
 
    var loop = new Sokoban.SelfPlayLoop({
-     searchDeadline: 20000,
+     weights,
+     kBackend: 'tensorflowSimple',
+     searchDeadline: 1000,
      kTemperature: 1,
      fen: sokoban.getFen()
    }, onProgress);
@@ -242,7 +251,7 @@
    };
  }
 
- const initSokoban = levels => {
+ const initSokoban = (levels, weights) => {
    var opts = {
      levels,
      level: 1,
@@ -256,8 +265,8 @@
 
    var sokoban = Sokoban(document.getElementById('app'), opts);
 
-   const aiApi = initAiPlay(sokoban);
-   const selfPlayApi = initSelfPlay(sokoban);
+   const aiApi = initAiPlay(sokoban, weights);
+   const selfPlayApi = initSelfPlay(sokoban, weights);
 
    renderHud(level, sokoban);
 
@@ -467,15 +476,18 @@
 
      $elLevelSet.selectedIndex = 0;
 
-     var clearSokoban = initSokoban(getSelectedLevelSet($elLevelSet, levelSets));
 
-     onChange($elLevelSet, (e) => {
-       const levels = getSelectedLevelSet($elLevelSet, levelSets);
+     Sokoban.loadWeights().then(weights => {
+       var clearSokoban = initSokoban(getSelectedLevelSet($elLevelSet, levelSets), weights);
 
-       if (clearSokoban) {
-         clearSokoban();
-       }
+       onChange($elLevelSet, (e) => {
+         const levels = getSelectedLevelSet($elLevelSet, levelSets);
+
+         if (clearSokoban) {
+           clearSokoban();
+         }
          clearSokoban = initSokoban(levels);
+       });
      });
 
    });

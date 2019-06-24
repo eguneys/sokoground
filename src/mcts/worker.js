@@ -192,6 +192,7 @@ export default function SearchWorker(search, params) {
   };
 
   const runNNComputation = () => {
+    computation.computeBlocking();
   };
 
   const fetchMinibatchResults = () => {

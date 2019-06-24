@@ -1,3 +1,5 @@
+export const kInputPlanes = 58;
+
 export function InputPlane() {
 
   this.mask = 0;

@@ -28,7 +28,8 @@ const devConfig = {
         exclude: path.resolve(__dirname, './node_modules/')
       },{
         test: /\.(jpe?g|png|gif|svg|json)$/i,
-        use: 'file-loader'
+        use: 'file-loader',
+        exclude: path.resolve(__dirname, './node_modules/')
       },
       {
         test: /\.(frag?g|vert)$/i,
