@@ -215,7 +215,7 @@ export default function SearchWorker(search, params) {
     nodeToProcess.v = -computation.getQVal(idxInComputation);
 
     if (nodeToProcess.v === -1) {
-      debugger;
+      // debugger;
     }
 
     var total = 0;
@@ -285,6 +285,10 @@ export default function SearchWorker(search, params) {
 
     }
   };
+
+  const disposeIteration = () => {
+    computation.dispose();
+  };
   
   const executeOneIteration = () => {
 
@@ -297,6 +301,8 @@ export default function SearchWorker(search, params) {
     fetchMinibatchResults();
 
     doBackupUpdate();
+
+    disposeIteration();
   };
 
   this.Run = () => {

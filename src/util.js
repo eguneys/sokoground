@@ -56,7 +56,7 @@ function isObject(o) {
 export function makeStorage(name) {
   return {
     get() {
-      window.localStorage.getItem(name);
+      return window.localStorage.getItem(name);
     },
     set(value) {
       window.localStorage.setItem(name, value);

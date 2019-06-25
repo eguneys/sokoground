@@ -230,10 +230,22 @@
      renderSelfPlay(progress);
    }
 
-   var loop = new Sokoban.SelfPlayLoop({
-     weights,
+   /* var loop = new Sokoban.SelfPlayLoop({
+    *   weights,
+    *   kBackend: 'tensorflowSimple',
+    *   searchDeadline: 1000,
+    *   kTemperature: 1,
+    *   fen: sokoban.getFen()
+    * }, onProgress);
+
+    * var train = new Sokoban.Training({
+    *   weights,
+    *   kBackend: 'tensorflowSimple'
+    * }); */
+
+   var loop = new Sokoban.TrainingLoop({
      kBackend: 'tensorflowSimple',
-     searchDeadline: 1000,
+     searchDeadline: 3000,
      kTemperature: 1,
      fen: sokoban.getFen()
    }, onProgress);
@@ -245,7 +257,7 @@
      start() {
        if (!isRunning) {
          isRunning = true;
-         loop.run();         
+         loop.run();
        }
      }
    };
@@ -371,8 +383,12 @@
  }
 
  function renderSelfPlay(progress) {
-   progress = progress.n + '/' + progress.t + ' games played';
-   document.getElementById('selfProgress').innerHTML = progress;
+   console.log(progress);
+   let res = progress.n + '/' + progress.t + ' games played';
+   res += ' epoch ' + progress.epoch;
+   if (progress.loss) res += ' loss ' + progress.loss;
+   if (progress.acc) res += ' acc ' + progress.acc;
+   document.getElementById('selfProgress').innerHTML = res;
  }
 
 

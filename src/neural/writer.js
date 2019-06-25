@@ -1,12 +1,7 @@
 import { makeStorage } from '../util';
 
 export default function V4TrainingData() {
-  this.probabilities = {
-    up: -1,
-    down: -1,
-    left: -1,
-    right: -1
-  };
+  this.probabilities = [-1, -1, -1, -1];
 
   this.planes = [];
   for (var i = 0; i < 56; i++) {

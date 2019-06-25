@@ -89,8 +89,14 @@ function TFNetworkComputation(network) {
         iterIdx += 64;
       }
     }
-    input = buffer.toTensor();
-    input = input.reshape([-1, kInputPlanes * 8 * 8]);
+    var bufferTensor = buffer.toTensor();
+    input = bufferTensor.reshape([-1, kInputPlanes * 8 * 8]);
+    bufferTensor.dispose();
+  };
+
+  this.dispose = () => {
+    input.dispose();
+    output.forEach(_ => _.dispose());
   };
 }
 
@@ -124,6 +130,7 @@ tf.loadLayersModel('localstorage://modelValue').catch(e => {
   const { value, policy } = MakeNetwork();
   value.save('localstorage://modelValue');
   policy.save('localstorage://modelPolicy');
+  throw e;
 });
 
 NetworkFactory.Get().RegisterNetwork("tensorflowSimple", makeTFNetwork);
