@@ -20,3 +20,4 @@ module.exports.TrainingLoop = SelfPlayLoop.TrainingLoop;
 module.exports.Training = Training.Training;
 module.exports.loadLevels = fen.loadLevels;
 module.exports.loadWeights = loader.loadWeights;
+module.exports.clearWeights = loader.clearWeights;

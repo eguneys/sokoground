@@ -1,4 +1,4 @@
-export const kInputPlanes = 58;
+export const kInputPlanes = 56 + 2;
 
 export function InputPlane() {
 

@@ -12,6 +12,8 @@ import { GameResult } from './game';
 function SelfPlayTournament(options, 
                             gameInfoCb) {
 
+  const writer = new TrainingDataWriter();
+
   const searchLimits = {
     searchDeadline: options.searchDeadline
   };
@@ -52,10 +54,8 @@ function SelfPlayTournament(options,
           moves: game.getMoves()
         };
 
-        const writer = new TrainingDataWriter();
-        const trainingData = game.writeTrainingData(writer);
 
-        writer.finalize();
+        const trainingData = game.writeTrainingData(writer);
 
         gameCallback(gameInfo);
       }
@@ -74,7 +74,7 @@ function SelfPlayTournament(options,
       plays.push(playOneGame(gameId));
     }
 
-    return Promise.all(plays);
+    return Promise.all(plays).finally(writer.finalize);
   };
 }
 

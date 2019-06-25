@@ -48,13 +48,13 @@ export function Training(options) {
         pYs = data.map(_ => _.probabilities);
 
     xs = xs.toTensor();
-    xs = xs.reshape([-1, kInputPlanes * 8 * 8]);
+    xs = xs.reshape([-1, kInputPlanes, 8, 8]);
     vYs = tf.tensor1d(vYs);
     pYs = tf.tensor2d(pYs, [pYs.length, 4]);
 
     return Promise
-      .all([value.fit(xs, vYs, { verbose: 2 }),
-            policy.fit(xs, pYs, { verbose: 2 })])
+      .all([value.fit(xs, vYs),
+            policy.fit(xs, pYs)])
       .then(hs => {
         saveWeights(network.model);
         console.log(tf.memory().numTensors);

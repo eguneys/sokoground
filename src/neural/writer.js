@@ -1,10 +1,11 @@
 import { makeStorage } from '../util';
+import { kInputPlanes } from './network';
 
 export default function V4TrainingData() {
-  this.probabilities = [-1, -1, -1, -1];
+  this.probabilities = [0, 0, 0, 0];
 
   this.planes = [];
-  for (var i = 0; i < 56; i++) {
+  for (var i = 0; i < kInputPlanes; i++) {
     this.planes[i] = null;
   }
   

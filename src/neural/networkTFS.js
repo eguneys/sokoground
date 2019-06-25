@@ -3,16 +3,42 @@ import * as tf from '@tensorflow/tfjs';
 import { kInputPlanes } from './network';
 import BitIterator from './bititer';
 
+import { loadWeights, saveWeights } from './loader';
+
 function MakeNetwork() {
   const hiddenNodes = 8,
         inputNodes = 58;
 
   const policy = tf.sequential({
     layers: [
+      // tf.layers.dense({
+      //   units: hiddenNodes,
+      //   inputShape: [inputNodes, 8, 8],
+      //   activation: 'sigmoid'
+      // }),
+      tf.layers.conv2d({
+        filters: 128,
+        kernelSize: 3,
+        strides: 1,
+        activation: 'relu',
+        inputShape: [inputNodes, 8, 8],
+      }),
+      tf.layers.conv2d({
+        filters: 256,
+        kernelSize: 3,
+        strides: 1,
+        activation: 'relu',
+      }),
+      tf.layers.conv2d({
+        filters: 256,
+        kernelSize: 3,
+        strides: 1,
+        activation: 'relu',
+      }),
+      tf.layers.flatten(),
       tf.layers.dense({
-        units: hiddenNodes,
-        inputShape: [inputNodes * 8 * 8],
-        activation: 'sigmoid'
+        units: 100,
+        activation: 'relu'
       }),
       tf.layers.dense({
         units: 4,
@@ -21,29 +47,37 @@ function MakeNetwork() {
     ]
   });
 
-  policy.compile({
-    optimizer: 'sgd',
-    loss: 'categoricalCrossentropy',
-    metrics: ['accuracy']
-  });
-
   const value = tf.sequential({
     layers: [
+      tf.layers.conv2d({
+        filters: 128,
+        kernelSize: 3,
+        strides: 1,
+        activation: 'relu',
+        inputShape: [inputNodes, 8, 8],
+      }),
+      tf.layers.conv2d({
+        filters: 256,
+        kernelSize: 3,
+        strides: 1,
+        activation: 'relu',
+      }),
+      tf.layers.conv2d({
+        filters: 256,
+        kernelSize: 3,
+        strides: 1,
+        activation: 'relu',
+      }),
+      tf.layers.flatten(),
       tf.layers.dense({
-        units: 8,
-        inputShape: [inputNodes * 8 * 8],
+        units: 100,
+        activation: 'relu'
       }),
       tf.layers.dense({
         units: 1,
         activation: 'tanh'
       })
     ]
-  });
-
-  value.compile({
-    optimizer: 'sgd',
-    loss: 'categoricalCrossentropy',
-    metrics: ['accuracy']
   });
 
 
@@ -90,7 +124,7 @@ function TFNetworkComputation(network) {
       }
     }
     var bufferTensor = buffer.toTensor();
-    input = bufferTensor.reshape([-1, kInputPlanes * 8 * 8]);
+    input = bufferTensor.reshape([-1, kInputPlanes, 8, 8]);
     bufferTensor.dispose();
   };
 
@@ -113,8 +147,9 @@ function TFNetwork(weights, options) {
 
     const predictionP = policy.predict(input);
     const predictionQ = value.predict(input);
+
     output.push(predictionQ);
-    output.push(predictionP)
+    output.push(predictionP);
   };
 
   this.newComputation = () => {
@@ -126,11 +161,9 @@ function makeTFNetwork(weights, options) {
   return new TFNetwork(weights, options);
 }
 
-tf.loadLayersModel('localstorage://modelValue').catch(e => {
-  const { value, policy } = MakeNetwork();
-  value.save('localstorage://modelValue');
-  policy.save('localstorage://modelPolicy');
-  throw e;
+loadWeights().catch(e => {
+  const weights = MakeNetwork();
+  saveWeights(weights);
 });
 
 NetworkFactory.Get().RegisterNetwork("tensorflowSimple", makeTFNetwork);

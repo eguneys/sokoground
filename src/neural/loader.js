@@ -1,7 +1,8 @@
 import * as tf from '@tensorflow/tfjs';
 
-export const valueUrl = 'localstorage://modelValue';
-export const policyUrl = 'localstorage://modelPolicy';
+export const saveMedium = 'indexeddb://';
+export const valueUrl = saveMedium + 'modelValue';
+export const policyUrl = saveMedium + 'modelPolicy';
 
 export function loadWeights() {
   return Promise
@@ -11,11 +12,17 @@ export function loadWeights() {
       return {
         value: values[0],
         policy: values[1]
-      }
+      };
     });
 };
 
 export function saveWeights(weights) {
+  console.trace();
   weights.value.save(valueUrl);
   weights.policy.save(policyUrl);
+};
+
+export function clearWeights() {
+  tf.io.removeModel(valueUrl);
+  tf.io.removeModel(policyUrl);
 };

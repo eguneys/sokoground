@@ -90,6 +90,7 @@
         <button id="prevLevel"> Previous Level </button>
         <button id="nextLevel"> Next Level </button>
         <button id="selfplay"> Start Self Play </button>
+        <button id="removemodel"> Remove model </button>
       </div>
     </div>
   </div>
@@ -245,7 +246,7 @@
 
    var loop = new Sokoban.TrainingLoop({
      kBackend: 'tensorflowSimple',
-     searchDeadline: 3000,
+     searchDeadline: 2000,
      kTemperature: 1,
      fen: sokoban.getFen()
    }, onProgress);
@@ -507,6 +508,11 @@
      });
 
    });
+
+ onClick(document.getElementById('removemodel'), () => {
+   Sokoban.clearWeights();
+   location.reload();
+ });
 </script>
 
 </body>
