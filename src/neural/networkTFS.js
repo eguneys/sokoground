@@ -163,7 +163,9 @@ function makeTFNetwork(weights, options) {
 
 loadWeights().catch(e => {
   const weights = MakeNetwork();
-  saveWeights(weights);
+  saveWeights(weights).then(() => {
+    location.reload();
+  });
 });
 
 NetworkFactory.Get().RegisterNetwork("tensorflowSimple", makeTFNetwork);

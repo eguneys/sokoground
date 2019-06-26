@@ -255,8 +255,8 @@
     * }); */
 
    var loop = new Sokoban.TrainingLoop({
-     kBackend: 'tensorflowSimple',
-     searchDeadline: 30000,
+     // kBackend: 'tensorflowSimple',
+     searchDeadline: 300,
      kTemperature: 1,
      fen: sokoban.getFen()
    }, onProgress);

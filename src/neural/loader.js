@@ -17,8 +17,8 @@ export function loadWeights() {
 };
 
 export function saveWeights(weights) {
-  weights.value.save(valueUrl);
-  weights.policy.save(policyUrl);
+  return Promise.all([weights.value.save(valueUrl),
+                      weights.policy.save(policyUrl)]);
 };
 
 export function clearWeights() {

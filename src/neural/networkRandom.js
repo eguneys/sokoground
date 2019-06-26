@@ -41,6 +41,8 @@ function RandomNetworkComputation() {
   this.getPVal = (sample, moveId) => {
     return (HashCat(inputs[sample], moveId) % 0xfffffff) / 0xfffffff;
   };
+
+  this.dispose = () => {};
 }
 
 function RandomNetwork(options) {
