@@ -74,7 +74,7 @@ function SelfPlayTournament(options,
       plays.push(playOneGame(gameId));
     }
 
-    return Promise.all(plays).finally(writer.finalize);
+    return Promise.all(plays).then(writer.finalize);
   };
 }
 

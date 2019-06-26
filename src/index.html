@@ -90,6 +90,7 @@
         <button id="prevLevel"> Previous Level </button>
         <button id="nextLevel"> Next Level </button>
         <button id="selfplay"> Start Self Play </button>
+        <button id="training"> Request Training </button>
         <button id="removemodel"> Remove model </button>
       </div>
     </div>
@@ -161,7 +162,7 @@
  var minutes = 60 * seconds
  var hour = 60 * minutes;
 
- var kSearchTime = 10  * seconds;
+ var kSearchTime = 30  * seconds;
 
  function initAiPlay(sokoban, weights) {
 
@@ -227,8 +228,16 @@
  function initSelfPlay(sokoban, weights) {
    var isRunning = false;
 
+   var requestTraining = false;
+   var lastLoop;
+
    function onProgress(progress) {
-     renderSelfPlay(progress);
+     let res = progress.n + '/' + progress.t + ' games played';
+     if (progress.epoch) res += ' epoch ' + progress.epoch;
+     if (progress.loss) res += ' loss ' + progress.loss;
+     if (progress.acc) res += ' acc ' + progress.acc;
+
+     renderSelfPlay(res);
    }
 
    /* var loop = new Sokoban.SelfPlayLoop({
@@ -239,6 +248,7 @@
     *   fen: sokoban.getFen()
     * }, onProgress);
 
+
     * var train = new Sokoban.Training({
     *   weights,
     *   kBackend: 'tensorflowSimple'
@@ -246,7 +256,7 @@
 
    var loop = new Sokoban.TrainingLoop({
      kBackend: 'tensorflowSimple',
-     searchDeadline: 2000,
+     searchDeadline: 30000,
      kTemperature: 1,
      fen: sokoban.getFen()
    }, onProgress);
@@ -257,8 +267,16 @@
      },
      start() {
        if (!isRunning) {
+
          isRunning = true;
          loop.run();
+       }
+     },
+     train() {
+       if (isRunning) {
+         loop.requestTrain();
+       } else {
+         loop.train(weights);
        }
      }
    };
@@ -317,6 +335,10 @@
 
    unbinds.push(onClick(document.getElementById('selfplay'), () => {
      selfPlayApi.start();
+   }));
+
+   unbinds.push(onClick(document.getElementById('training'), () => {
+     selfPlayApi.train();
    }));
 
    unbinds.push(unbindable(document.getElementById('searchTime'), 'input', function() {
@@ -383,12 +405,7 @@
    document.getElementById('aiplay').innerHTML = status + ' AI Play';
  }
 
- function renderSelfPlay(progress) {
-   console.log(progress);
-   let res = progress.n + '/' + progress.t + ' games played';
-   res += ' epoch ' + progress.epoch;
-   if (progress.loss) res += ' loss ' + progress.loss;
-   if (progress.acc) res += ' acc ' + progress.acc;
+ function renderSelfPlay(res) {
    document.getElementById('selfProgress').innerHTML = res;
  }
 

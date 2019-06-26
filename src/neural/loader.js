@@ -17,7 +17,6 @@ export function loadWeights() {
 };
 
 export function saveWeights(weights) {
-  console.trace();
   weights.value.save(valueUrl);
   weights.policy.save(policyUrl);
 };

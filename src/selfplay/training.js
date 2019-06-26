@@ -4,15 +4,32 @@ import { makeStorage } from '../util';
 
 import { kInputPlanes } from '../neural/network';
 import NetworkFactory from '../neural/factory';
+import { TrainingDataWriter } from '../neural/writer';
 import { saveWeights } from '../neural/loader';
 import BitIterator from '../neural/bititer';
 
 export function Training(options) {
 
-  const data = JSON.parse(makeStorage('v4training').get()),
-        network = NetworkFactory.LoadNetwork(options);
+  const network = NetworkFactory.LoadNetwork(options);
 
   this.run = () => {
+    return new TrainingDataWriter().get()
+      .then(_ => {
+        function step(values, history) {
+          if (values.length) {
+            const chunk = values.splice(0, 10000);
+            console.log('training ', chunk.length + '/' + values.length);
+            return train(chunk).then(_ => step(values, _));
+          } else {
+            return Promise.resolve(history);
+          }
+        };
+        return step(_);
+      });
+  };
+
+  const train = data => {
+    console.log(data);
     const { value, policy } = network.model;
 
     value.compile({
@@ -27,9 +44,9 @@ export function Training(options) {
       metrics: ['accuracy']
     });
 
-    let xs = tf.buffer([data.length, kInputPlanes, 8, 8]);
+    let xsBuffer = tf.buffer([data.length, kInputPlanes, 8, 8]);
     
-    var flat = xs.values;
+    var flat = xsBuffer.values;
 
 
     let iterIdx = 0;
@@ -44,19 +61,25 @@ export function Training(options) {
       }
     }
 
-    let vYs = data.map(_ => _.bestQ),
-        pYs = data.map(_ => _.probabilities);
+    xsBuffer = xsBuffer.toTensor();
 
-    xs = xs.toTensor();
-    xs = xs.reshape([-1, kInputPlanes, 8, 8]);
+    let xs,
+        vYs = data.map(_ => _.bestQ),
+        pYs = data.map(_ => _.probabilities);
+    
+    xs = xsBuffer.reshape([-1, kInputPlanes, 8, 8]);
     vYs = tf.tensor1d(vYs);
     pYs = tf.tensor2d(pYs, [pYs.length, 4]);
+
+    const dispose = () => [xsBuffer, xs, vYs, pYs]
+          .forEach(_ => _.dispose);
 
     return Promise
       .all([value.fit(xs, vYs),
             policy.fit(xs, pYs)])
       .then(hs => {
         saveWeights(network.model);
+        dispose();
         console.log(tf.memory().numTensors);
         return hs[0].history;
       });

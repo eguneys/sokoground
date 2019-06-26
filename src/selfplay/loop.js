@@ -1,6 +1,7 @@
 import SelfPlayTournament from './tournament';
 import { Training } from './training';
 
+import { TrainingDataWriter } from '../neural/writer';
 import { loadWeights } from '../neural/loader';
 
 import { roundTo } from '../mcts/util';
@@ -11,12 +12,13 @@ export function SelfPlayLoop(options, progressCb) {
 
   let progress = 0;
   const totalGames = options.kTotalGames;
+  let tournament;
 
 
   this.run = () => {
     sendProgress();
-    const tournament = new SelfPlayTournament(options, 
-                                              sendGameInfo);
+    tournament = new SelfPlayTournament(options, 
+                                        sendGameInfo);
     return tournament.Run();
   };
 
@@ -33,7 +35,63 @@ export function SelfPlayLoop(options, progressCb) {
   };
 }
 
+
+
 export function TrainingLoop(options, progressCb) {
+  let epoch = 0,
+      loss,
+      acc;
+
+  let requestTraining;
+
+  const writer = new TrainingDataWriter();
+  
+  this.run = () => {
+    loadWeights().then(weights => {
+      const step = () => {
+        epoch++;
+        const loop = new SelfPlayLoop({ ...options, weights },
+                                      onProgress);
+        loop.run().then(() => {
+          if (!requestTraining) {
+            setTimeout(step, 0);
+          } else {
+            requestTraining = false;
+            this.train(weights, true);
+          }
+        });
+      };
+      step();
+    });
+  };
+
+  this.train = (weights, runAfter) => {
+    const training =
+          new Training({ ...options, weights });
+    training.run().then((history) => {
+      epoch = 0;
+      loss = roundTo(history.loss);
+      acc = roundTo(history.acc);
+      writer.clear().then(() => (runAfter?this.run:()=>{})());
+    });
+  };
+
+  this.requestTrain = () => {
+    requestTraining = true;
+  };
+
+  const onProgress = ({ n, t }) => {
+    progressCb({
+      n,
+      t,
+      epoch,
+      loss,
+      acc
+    });
+  };
+}
+
+export function TrainingLoopOLD(options, progressCb) {
   let epoch = 0,
       loss,
       acc;

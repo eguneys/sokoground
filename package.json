@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "@tensorflow/tfjs": "^1.2.1",
+    "idb": "^4.0.3",
     "string-hash": "^1.1.3"
   }
 }

@@ -1,3 +1,5 @@
+import { openDB as openIndexdb  } from 'idb';
+
 const rows = 20;
 
 const allKeys = (() => {
@@ -60,6 +62,48 @@ export function makeStorage(name) {
     },
     set(value) {
       window.localStorage.setItem(name, value);
+    },
+    clear() {
+      window.localStorage.removeItem(name);
+    }
+  };
+}
+
+export function makeIndexdb(name) {
+  const open = () => openIndexdb("sokoapp", 2, {
+    upgrade(db) {
+      console.log('here');
+      if (!db.objectStoreNames.contains(name)) {
+        console.log(name);
+        db.createObjectStore(name, { autoIncrement: true });
+      }
+    }
+  });
+  
+  return {
+    getAll() {
+      return open().then(db => {
+        return db
+          .transaction(name, 'readwrite')
+          .objectStore(name)
+          .getAll();        
+      });
+    },
+    add(value) {
+      return open().then(db => {
+        return db
+          .transaction(name, 'readwrite')
+          .objectStore(name)
+          .add(value);
+      });      
+    },
+    clear() {
+      return open().then(db => {
+        return db
+          .transaction(name, 'readwrite')
+          .objectStore(name)
+          .clear();
+      });
     }
   };
 }

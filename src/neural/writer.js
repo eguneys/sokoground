@@ -1,4 +1,4 @@
-import { makeStorage } from '../util';
+import { makeStorage, makeIndexdb } from '../util';
 import { kInputPlanes } from './network';
 
 export default function V4TrainingData() {
@@ -13,7 +13,7 @@ export default function V4TrainingData() {
 
 export function TrainingDataWriter() {
 
-  this.storage = makeStorage('v4training');
+  this.storage = makeIndexdb('v4training');
   
   this.chunks = [];
 
@@ -21,8 +21,19 @@ export function TrainingDataWriter() {
     this.chunks.push(chunk);
   };
 
+  this.get = () => {
+    return this.storage.getAll().then(values => {
+      console.log(values, values.flat());
+      return values.flat();
+    });
+  };
+
   this.finalize = () => {
-    this.storage.set(JSON.stringify(this.chunks));
+    return this.storage.add(this.chunks);
+  };
+
+  this.clear = () => {
+    return this.storage.clear();
   };
 
 }
